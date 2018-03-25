@@ -45,8 +45,7 @@ void fa::Engine::Init()
 	LoadShader("basic", "shaders/basic.vert", "shaders/basic.frag");
 
 	// Initialize Scene
-	m_Scene = new Scene(this, 50, 50, 1.0f);
-
+	m_Scene = new Scene(this, 100, 300, 1.0f);
 
 	// Init GL Parameters
 	glEnable(GL_DEPTH_TEST);

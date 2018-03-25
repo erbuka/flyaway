@@ -88,7 +88,7 @@ namespace fa {
 	{
 		return {
 			lhs.Y * rhs.Z - lhs.Z * rhs.Y,
-			lhs.X * rhs.Z - lhs.Z * rhs.X,
+			lhs.Z * rhs.X - lhs.X * rhs.Z,
 			lhs.X * rhs.Y - lhs.Y * rhs.X
 		};
 	}

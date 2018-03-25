@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MatrixStack.h"
+#include <vector>
 
 namespace fa 
 {
@@ -26,7 +27,7 @@ namespace fa
 		void Render();
 	private:
 
-		void ComputeFaceNormals();
+		void ComputeNormals();
 
 		void UpdateTerrain(int fromVertex, int count);
 
@@ -35,6 +36,7 @@ namespace fa
 		int m_Width, m_Depth, m_VerticesCount;
 		float m_TileSize;
 		Vertex * m_Vertices;
+		std::vector<unsigned int> m_Indices;
 		Engine * m_Engine;
 		Vector3f m_CameraPosition;
 		BiomeGenerator * m_Biome;

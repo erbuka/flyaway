@@ -4,6 +4,7 @@
 fa::GreenHills::GreenHills()
 {
 	m_Perlin = new Perlin(1024);
+	m_Perlin->SetPersistance(0.60f);
 }
 
 fa::GreenHills::~GreenHills()

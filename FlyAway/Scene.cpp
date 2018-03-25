@@ -9,33 +9,46 @@ fa::Scene::Scene(Engine * engine, int width, int depth, float tileSize) :
 	m_Width(width),
 	m_Depth(depth),
 	m_TileSize(tileSize),
-	m_CameraPosition(0, 1, 0)
+	m_CameraPosition(0, 1, 0),
+	m_Indices()
 {
 
-	m_VerticesCount = m_Width * m_Depth * 6;
+	m_VerticesCount = m_Width * m_Depth;
 
 	// Create first biome
 	m_Biome = new GreenHills();
 		
-	// Let's create a triangle grid
-	m_Vertices = new Vertex[m_Width * m_Depth * 6];
+	// Create vertices
+	m_Vertices = new Vertex[m_VerticesCount];
+
 
 	for (int z = 0; z < m_Depth; z++)
 	{
 		for (int x = 0; x < m_Width; x++)
 		{
-			float bx = (x - m_Width / 2) * m_TileSize;
-			float bz = -z * m_TileSize;
-
-			m_Vertices[z * m_Depth * 6 + x * 6 + 0].Position = Vector3f(bx, 0, bz);
-			m_Vertices[z * m_Depth * 6 + x * 6 + 1].Position = Vector3f(bx, 0, bz + m_TileSize);
-			m_Vertices[z * m_Depth * 6 + x * 6 + 2].Position = Vector3f(bx + m_TileSize, 0, bz);
-
-			m_Vertices[z * m_Depth * 6 + x * 6 + 3].Position = Vector3f(bx + m_TileSize, 0, bz);
-			m_Vertices[z * m_Depth * 6 + x * 6 + 4].Position = Vector3f(bx, 0, bz + m_TileSize);
-			m_Vertices[z * m_Depth * 6 + x * 6 + 5].Position = Vector3f(bx + m_TileSize, 0, bz + m_TileSize);
+			m_Vertices[z * m_Width + x].Position = {
+				(x - m_Width / 2) * m_TileSize,
+				0,
+				-z * m_TileSize
+			};
 		}
 	}
+
+	// Create indices for triangles
+	for (int z = 0; z < m_Depth - 1; z++)
+	{
+		for (int x = 0; x < m_Width - 1; x++)
+		{
+			m_Indices.push_back(z * m_Width + x);
+			m_Indices.push_back(z * m_Width + x + 1);
+			m_Indices.push_back((z + 1) * m_Width + x);
+
+			m_Indices.push_back((z + 1) * m_Width + x);
+			m_Indices.push_back(z * m_Width + x + 1);
+			m_Indices.push_back((z + 1) * m_Width + x + 1);
+		}
+	}
+
 
 	// Initialize random color for testing
 	for (int i = 0; i < m_VerticesCount; i++)
@@ -47,7 +60,7 @@ fa::Scene::Scene(Engine * engine, int width, int depth, float tileSize) :
 	// Create a vertex buffer and fill with the data
 	glFastFail(glGenBuffers(1, &m_Vbo));
 	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, m_Vbo));
-	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_Width * m_Depth * 6 * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
+	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_VerticesCount * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
 	glFastFail(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0));			// Position
 	glFastFail(glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)12));	// Normal
 	glFastFail(glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)24));	// Diffusion Color
@@ -57,7 +70,7 @@ fa::Scene::Scene(Engine * engine, int width, int depth, float tileSize) :
 
 fa::Scene::~Scene()
 {
-	//delete[] m_Vertices;
+	delete[] m_Vertices;
 	glDeleteBuffers(1, &m_Vbo);
 }
 
@@ -86,11 +99,11 @@ void fa::Scene::Update(float elapsedTime)
 	}
 
 	// Compute Normals (for now face normals)
-	ComputeFaceNormals();
+	ComputeNormals();
 
 	// Transfer data to VBO
 	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, m_Vbo));
-	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_Width * m_Depth * 6 * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
+	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_VerticesCount * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
 	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
 }
@@ -119,7 +132,9 @@ void fa::Scene::Render()
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	glDrawArrays(GL_TRIANGLES, 0, m_Width * m_Depth * 6);
+	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, m_Indices.data());
+
+	// glDrawArrays(GL_TRIANGLES, 0, m_Width * m_Depth * 6);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
@@ -129,17 +144,31 @@ void fa::Scene::Render()
 	glUseProgram(0);
 }
 
-void fa::Scene::ComputeFaceNormals()
+void fa::Scene::ComputeNormals()
 {
-	// (Easy) face normal compute
-	
-	// Foreach triangle (CCW edges)...
-	for (int i = 0; i < m_Width * m_Depth * 6; i += 3)
-	{
-		auto normal = Cross(m_Vertices[i + 2].Position - m_Vertices[i + 1].Position,
-			m_Vertices[i + 1].Position - m_Vertices[i + 0].Position).Normalized();
 
-		m_Vertices[i + 0].Normal = m_Vertices[i + 1].Normal = m_Vertices[i + 2].Normal = normal;
+	for (int z = 0; z < m_Depth; z++)
+	{
+		for (int x = 0; x < m_Width; x++)
+		{
+			Vertex &self = m_Vertices[z * m_Width + x];
+
+			Vector3f left = x == 0 ? Vector3f{ -1.0f, 0.0f, 0.0f } :
+				m_Vertices[z * m_Width + x - 1].Position - self.Position;
+
+			Vector3f right = x == m_Width - 1 ? Vector3f{ 1.0f, 0.0f, 0.0f } :
+				m_Vertices[z * m_Width + x + 1].Position - self.Position;
+
+			Vector3f down = z == 0 ? Vector3f{ 0.0f, 0.0f, 1.0f } :
+				m_Vertices[(z - 1) * m_Width + x].Position - self.Position;
+
+			Vector3f up = z == m_Depth - 1 ? Vector3f{ 0.0f, 0.0f, -1.0f } :
+				m_Vertices[(z + 1) * m_Width + x].Position - self.Position;
+
+
+			self.Normal = (Cross(left, down) + Cross(down, right) + Cross(right, up) + Cross(up, left)).Normalized();
+			
+		}
 	}
 }
 
@@ -149,6 +178,7 @@ void fa::Scene::UpdateTerrain(int fromVertex, int count)
 	for (int i = fromVertex; i < count; i++)
 	{
 		auto biomeDescr = m_Biome->GenerateAt(m_Vertices[i].Position + m_CameraPosition);
+		//m_Vertices[i].Position.Y = 0;
 		m_Vertices[i].Position.Y = biomeDescr.TerrainHeight;
 	}
 }
