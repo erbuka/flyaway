@@ -2,6 +2,8 @@
 #include "Util.h"
 #include "Scene.h"
 #include "GLFW/glfw3.h"
+#include "Wavefront.h"
+#include "WavefrontModel.h"
 #include <chrono>
 
 fa::Engine::Engine(GLFWwindow * window) : m_Window(window)
@@ -43,12 +45,17 @@ void fa::Engine::Init()
 {
 	// Initialize Shaders
 	LoadShader("basic", "shaders/basic.vert", "shaders/basic.frag");
+	LoadShader("toon", "shaders/toon.vert", "shaders/toon.frag");
+
+	// Load models
+	LoadModels();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, 100, 300, 1.0f);
+	m_Scene = new Scene(this, 300.0f, 5.0f, 1.0f, 300.0f);
 
 	// Init GL Parameters
 	glEnable(GL_DEPTH_TEST);
+
 }
 
 void fa::Engine::Update(float elapsedTime)
@@ -70,12 +77,25 @@ void fa::Engine::Render()
 	m_Scene->Render();
 }
 
+void fa::Engine::LoadModels()
+{
+	Wavefront cube = Wavefront::Parse(Util::ReadFile("models/cube.obj"));
+
+	m_Models[Models::Cube] = WavefrontModel::Create(cube);
+
+}
+
 void fa::Engine::Dispose()
 {
 	delete m_Scene;
 	for (auto program : m_Programs)
 	{
 		glDeleteProgram(program.second);
+	}
+
+	for (auto model : m_Models)
+	{
+		delete model.second;
 	}
 }
 

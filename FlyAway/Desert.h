@@ -4,17 +4,14 @@
 
 namespace fa
 {
-
 	class Perlin;
 
-	class GreenHills : public Biome
+	class Desert : public Biome
 	{
 	public:
-		GreenHills();
-		~GreenHills();
+		Desert();
 		virtual BiomeDescriptor GenerateAtXZ(float x, float z) override;
 	private:
 		Perlin * m_Perlin;
-		Perlin * m_ColorPerlin;
 	};
 }

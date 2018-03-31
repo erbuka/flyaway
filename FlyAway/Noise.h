@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Vecmath.h"
-
+#include <array>
 namespace fa
 {
 	class Noise
@@ -34,13 +34,13 @@ namespace fa
 
 	private:
 
-		static constexpr size_t SeedSize = 256;
+		static constexpr size_t SeedSize = 65536;
 		static constexpr size_t MaxOctaves = 8;
 
 		float m_Persistance = 0.5f;
 		unsigned int m_Octaves = MaxOctaves;
 
-		float * m_Seed;
+		std::array<float, SeedSize> m_Seed;
 
 		float GetSeed(size_t x, size_t y, size_t z) const;
 		float GetSeed(size_t x, size_t y) const;

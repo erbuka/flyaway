@@ -30,6 +30,26 @@ namespace fa {
 			return (T)std::sqrt(X*X + Y*Y + Z*Z);
 		}
 
+		Vector3 MoveTowards(const Vector3& target, float magnitude, bool& hit)
+		{
+			Vector3 diff = target - *this;
+			if (diff.Length() < magnitude)
+			{
+				hit = true;
+				return target;
+			}
+			else
+			{
+				hit = false;
+				return *this + diff.Normalized() * magnitude;
+			}
+		}
+
+		static Vector3 GetColor(int r, int g, int b)
+		{
+			return{ r / 255.0f, g / 255.0f,  b / 255.0f };
+		}
+
 	};
 	
 	template<typename T>
@@ -61,7 +81,7 @@ namespace fa {
 	template<typename T, typename K>
 	Vector3<T> operator*(const Vector3<T>& lhs, K rhs)
 	{
-		return Vector3<T>(lhs.X * rhs, lhs.Y * rhs, lhs.X * rhs);
+		return Vector3<T>(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs);
 	}
 
 	template<typename T>
@@ -74,7 +94,7 @@ namespace fa {
 	template<typename T, typename K>
 	Vector3<T> operator/(const Vector3<T>& lhs, K rhs)
 	{
-		return Vector3<T>(lhs.X / rhs, lhs.Y / rhs, lhs.X / rhs);
+		return Vector3<T>(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs);
 	}
 
 	template<typename T>
@@ -98,6 +118,7 @@ namespace fa {
 	{
 		struct { T X, Y; };
 		struct { T U, V; };
+		Vector2() : X(0), Y(0) {}
 		Vector2(T x, T y) : X(x), Y(y) {}
 		
 		Vector2 Floor() {
@@ -133,8 +154,8 @@ namespace fa {
 	struct Matrix4 {
 	public:
 		std::array<T, 16> Components;
-		
-		Matrix4() 
+
+		Matrix4()
 		{
 			Components = {
 				0.0f, 0.0f, 0.0f, 0.0f,
@@ -164,6 +185,16 @@ namespace fa {
 			});
 		}
 
+		static Matrix4 Translation(const Vector3<T>& t)
+		{
+			return Matrix4(std::array<T, 16> {
+				1.0f, 0.0f, 0.0f, t.X,
+				0.0f, 1.0f, 0.0f, t.Y,
+				0.0f, 0.0f, 1.0f, t.Z,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+		}
+
 	};
 
 	template<typename T>
@@ -185,9 +216,43 @@ namespace fa {
 		return result;
 	}
 
+	template<typename T>
+	struct BoundingBox3
+	{
+		Vector3<T> Min, Max;
+		T Width() const { return Max.X - Min.X; }
+		T Height() const { return Max.Y - Min.Y; }
+		T Depth() const { return Max.Z - Min.Z; }
+		Vector3<T> Center() const { return Util::Lerp(Max, Min, 0.5f); }
+	};
+
+	template<typename T>
+	struct BoundingBox2
+	{
+		Vector2<T> Min, Max;
+		T Width() const { return Max.X - Min.X; }
+		T Height() const { return Max.Y - Min.Y; }
+		Vector2<T> Center() const { return Util::Lerp(Max, Min, 0.5f); }
+	};
+
+	template<typename T>
+	struct Vertex
+	{
+		Vector3<T> Position;
+		Vector3<T> Normal;
+		Vector3<T> DiffuseColor;
+	};
+
+
 	using Vector2f = Vector2<float>;
 
 	using Vector3f = Vector3<float>;
 
 	using Matrix4f = Matrix4<float>;
+
+	using BoundingBox3f = BoundingBox3<float>;
+
+	using BoundingBox2f = BoundingBox2<float>;
+
+	using Vertexf = Vertex<float>;
 }

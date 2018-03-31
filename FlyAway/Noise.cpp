@@ -1,5 +1,8 @@
 #include "Noise.h"
 #include "Util.h"
+#include <algorithm>
+#include <random>
+#include <chrono>
 
 float fa::Noise::Sample(const Vector3f & point)
 {
@@ -25,21 +28,21 @@ float fa::Noise::Normalize(float x)
 fa::Perlin::Perlin(float domainSize) :
 	Noise::Noise(domainSize)
 {
-	m_Seed = new float[SeedSize];
+	for (int i = 0; i < SeedSize; i++)
+	{
+		m_Seed[i] = i;
+	}
 	NewSeed();
 }
 
 fa::Perlin::~Perlin()
 {
-	delete[] m_Seed;
 }
 
 void fa::Perlin::NewSeed()
 {
-	for (int i = 0; i < SeedSize; i++)
-	{
-		m_Seed[i] = (rand() % SeedSize);
-	}
+	std::shuffle(m_Seed.begin(), m_Seed.end(), 
+		std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
 }
 
 float fa::Perlin::SampleNormalized(const Vector3f & position)

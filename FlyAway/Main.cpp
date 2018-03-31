@@ -6,11 +6,12 @@
 #include "GLFW/glfw3.h"
 #include <chrono>
 
+#include "Wavefront.h"
+#include <fstream>
+
 int main(int argc, char ** argv)
 {	
 	GLFWwindow * window = nullptr;
-
-
 
 	fa::Util::ZeroFail(glfwInit());
 	fa::Util::ZeroFail(window = glfwCreateWindow(fa::CWidth, fa::CHeight, "Test", nullptr, nullptr));

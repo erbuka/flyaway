@@ -1,110 +1,51 @@
 #include "Scene.h"
 #include "Engine.h"
 #include "GreeenHills.h"
+#include "Desert.h"
+#include "Terrain.h"
 #include <vector>
 #include <future>
 
-fa::Scene::Scene(Engine * engine, int width, int depth, float tileSize) :
+fa::Scene::Scene(Engine * engine, int width, int chunkDepth, float tileSize, float sightRange) :
 	m_Engine(engine),
 	m_Width(width),
-	m_Depth(depth),
 	m_TileSize(tileSize),
-	m_CameraPosition(0, 1, 0),
-	m_Indices()
+	m_ChunkDepth(chunkDepth),
+	m_SightRange(sightRange)
 {
-
-	m_VerticesCount = m_Width * m_Depth;
-
-	// Create first biome
-	m_Biome = new GreenHills();
-		
-	// Create vertices
-	m_Vertices = new Vertex[m_VerticesCount];
-
-
-	for (int z = 0; z < m_Depth; z++)
-	{
-		for (int x = 0; x < m_Width; x++)
-		{
-			m_Vertices[z * m_Width + x].Position = {
-				(x - m_Width / 2) * m_TileSize,
-				0,
-				-z * m_TileSize
-			};
-		}
-	}
-
-	// Create indices for triangles
-	for (int z = 0; z < m_Depth - 1; z++)
-	{
-		for (int x = 0; x < m_Width - 1; x++)
-		{
-			m_Indices.push_back(z * m_Width + x);
-			m_Indices.push_back(z * m_Width + x + 1);
-			m_Indices.push_back((z + 1) * m_Width + x);
-
-			m_Indices.push_back((z + 1) * m_Width + x);
-			m_Indices.push_back(z * m_Width + x + 1);
-			m_Indices.push_back((z + 1) * m_Width + x + 1);
-		}
-	}
-
-
-	// Initialize random color for testing
-	for (int i = 0; i < m_VerticesCount; i++)
-	{
-		m_Vertices[i].DiffuseColor = {0.2f, 0.8f, 0.3f};
-	}
-
-
-	// Create a vertex buffer and fill with the data
-	glFastFail(glGenBuffers(1, &m_Vbo));
-	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, m_Vbo));
-	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_VerticesCount * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
-	glFastFail(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0));			// Position
-	glFastFail(glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)12));	// Normal
-	glFastFail(glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)24));	// Diffusion Color
-	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
+	m_WorldChunks = std::ceil(sightRange / (m_TileSize * m_ChunkDepth));
+	m_BiomeInterpolator = new BiomeInterpolator(new GreenHills());
+	m_BiomeInterpolator->PushBiome(new GreenHills());
 }
 
 fa::Scene::~Scene()
 {
-	delete[] m_Vertices;
-	glDeleteBuffers(1, &m_Vbo);
+	for (auto terrain : m_Terrain)
+	{
+		delete terrain;
+	}
+
+	delete m_BiomeInterpolator;
 }
 
 void fa::Scene::Update(float elapsedTime)
 {
-	constexpr int numThreads = 8;
-	std::future<void> futures[numThreads];
-	int verticesPerThread = std::ceil((float)m_VerticesCount / numThreads);
+
+
 
 	// Update Camera Position
-	auto biomeDescr = m_Biome->GenerateAt(m_CameraPosition);
-	m_CameraPosition.Z -= 50.0f * elapsedTime;
-	m_CameraPosition.Y = biomeDescr.TerrainHeight + 3;
-
-
-	// Start updating threads...
-	for (int i = 0; i < numThreads; i++)
+	if (m_CameraWaypoints.size() > 0)
 	{
-		futures[i] = std::async(&Scene::UpdateTerrain, this, i * verticesPerThread, verticesPerThread);
+		bool hit;
+		m_CameraPosition = m_CameraPosition.MoveTowards(m_CameraWaypoints[0], elapsedTime * 100, hit);
+		if (hit)
+		{
+			m_CameraWaypoints.erase(m_CameraWaypoints.begin());
+		}
 	}
 
-	// Wait for threads to finish
-	for (int i = 0; i < numThreads; i++)
-	{
-		futures[i].wait();
-	}
-
-	// Compute Normals (for now face normals)
-	ComputeNormals();
-
-	// Transfer data to VBO
-	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, m_Vbo));
-	glFastFail(glBufferData(GL_ARRAY_BUFFER, m_VerticesCount * sizeof(Vertex), (void*)m_Vertices, GL_DYNAMIC_DRAW));
-	glFastFail(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	// Update World
+	UpdateWorld(elapsedTime);
 
 }
 
@@ -115,7 +56,7 @@ void fa::Scene::Render()
 	m_Projection.Perspective(3.141592 / 4, fa::CWidth / (float)fa::CHeight, 0.1, 1000);
 	
 	m_ModelView.LoadIdentity();
-	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, 0);
+	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, -m_CameraPosition.Z);
 
 	auto mvMat = m_ModelView.Current();
 	auto prMat = m_Projection.Current();
@@ -126,59 +67,128 @@ void fa::Scene::Render()
 
 	glUniformMatrix4fv(glGetUniformLocation(basicProgram, "in_ProjectionMatrix"), 1, GL_TRUE, prMat.Ptr());
 	glUniformMatrix4fv(glGetUniformLocation(basicProgram, "in_ModelViewMatrix"), 1, GL_TRUE, mvMat.Ptr());
-	
-	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
 
-	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, m_Indices.data());
 
-	// glDrawArrays(GL_TRIANGLES, 0, m_Width * m_Depth * 6);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	for (auto terrain : m_Terrain)
+	{
+		glBindVertexArray(terrain->GetVAO());
+		glDrawElements(GL_TRIANGLES, terrain->GetIndicescount(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
 
 	glUseProgram(0);
 }
 
-void fa::Scene::ComputeNormals()
+
+fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 {
+	static bool firstCall = true;
+	static BoundingBox3f current;
 
-	for (int z = 0; z < m_Depth; z++)
+	if (firstCall)
 	{
-		for (int x = 0; x < m_Width; x++)
-		{
-			Vertex &self = m_Vertices[z * m_Width + x];
-
-			Vector3f left = x == 0 ? Vector3f{ -1.0f, 0.0f, 0.0f } :
-				m_Vertices[z * m_Width + x - 1].Position - self.Position;
-
-			Vector3f right = x == m_Width - 1 ? Vector3f{ 1.0f, 0.0f, 0.0f } :
-				m_Vertices[z * m_Width + x + 1].Position - self.Position;
-
-			Vector3f down = z == 0 ? Vector3f{ 0.0f, 0.0f, 1.0f } :
-				m_Vertices[(z - 1) * m_Width + x].Position - self.Position;
-
-			Vector3f up = z == m_Depth - 1 ? Vector3f{ 0.0f, 0.0f, -1.0f } :
-				m_Vertices[(z + 1) * m_Width + x].Position - self.Position;
-
-
-			self.Normal = (Cross(left, down) + Cross(down, right) + Cross(right, up) + Cross(up, left)).Normalized();
-			
-		}
+		current = { 
+			Vector3f(-m_Width / 2 * m_TileSize, 0, -m_ChunkDepth * m_TileSize),
+			Vector3f(m_Width / 2 * m_TileSize, 0, 0) 
+		};
+		firstCall = false;
 	}
+	else
+	{
+		current.Min = current.Min + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
+		current.Max = current.Max + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
+	}
+
+	return current;
 }
 
-void fa::Scene::UpdateTerrain(int fromVertex, int count)
+void fa::Scene::UpdateBiome(float elapsedTime)
 {
-	count = std::min(count + fromVertex, m_VerticesCount);
-	for (int i = fromVertex; i < count; i++)
+
+}
+
+void fa::Scene::UpdateWorld(float elapsedTime)
+{
+	// Remove OOB Terrain
+	for (auto terrain = m_Terrain.begin(); terrain != m_Terrain.end();)
 	{
-		auto biomeDescr = m_Biome->GenerateAt(m_Vertices[i].Position + m_CameraPosition);
-		//m_Vertices[i].Position.Y = 0;
-		m_Vertices[i].Position.Y = biomeDescr.TerrainHeight;
+
+		if ((*terrain)->GetBounds().Min.Z > m_CameraPosition.Z)
+		{
+			delete (*terrain);
+			terrain = m_Terrain.erase(terrain);
+		}
+		else
+		{
+			++terrain;
+		}
 	}
+
+	// Remove OOB Objects
+
+
+
+	// Generate new Biomes (TEMP)
+
+	if (m_BiomeInterpolator->IsStable())
+	{
+		m_BiomeInterpolator->PushBiome(new GreenHills());
+	}
+
+
+	// Generate new world chunks
+	while (m_Terrain.size() < m_WorldChunks)
+	{
+
+		BoundingBox3f bounds = GetNextChunkBounds();
+		Terrain * terrain = new Terrain(m_Width, m_ChunkDepth, bounds);
+
+		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 0.01f);
+
+		// Generate Adjacencies
+		for (int z = 0; z < terrain->GetVerticesZ(); z++)
+		{	
+			auto& left = terrain->GetAdjacency(Terrain::Left, z);
+			auto& right = terrain->GetAdjacency(Terrain::Right, z);
+
+			left.Position.Y = m_BiomeInterpolator->GenerateAt(left.Position).TerrainHeight;
+			right.Position.Y = m_BiomeInterpolator->GenerateAt(right.Position).TerrainHeight;
+
+		}
+
+		for (int x = 0; x < terrain->GetVerticesX(); x++)
+		{
+			auto& up = terrain->GetAdjacency(Terrain::Up, x);
+			auto& down = terrain->GetAdjacency(Terrain::Down, x);
+
+			up.Position.Y = m_BiomeInterpolator->GenerateAt(up.Position).TerrainHeight;
+			down.Position.Y = m_BiomeInterpolator->GenerateAt(down.Position).TerrainHeight;
+		}
+
+		// Generate Vertices
+		for (int i = 0; i < terrain->GetVerticesCount(); i++)
+		{
+			auto& vertex = (*terrain)[i];
+			auto biomeDescr = m_BiomeInterpolator->GenerateAt(vertex.Position);
+			vertex.Position.Y = biomeDescr.TerrainHeight;
+			vertex.DiffuseColor = biomeDescr.TerrainColor;
+		}
+
+
+		//m_CameraWaypoints.push_back().);
+
+		terrain->ComputeNormals();
+		terrain->GenerateVertexArray();
+
+		m_Terrain.push_back(terrain);
+
+		// Insert camera waypoint
+		auto biomeDescr = m_BiomeInterpolator->GenerateAt(bounds.Center());
+		m_CameraWaypoints.push_back(bounds.Center() + Vector3f{0, 3 + biomeDescr.TerrainHeight, 0});
+
+		m_BiomeInterpolator->EndInterpolation();
+	}
+
+
+
 }
