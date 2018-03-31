@@ -45,10 +45,11 @@ fa::WavefrontModel * fa::WavefrontModel::Create(Wavefront & wavefront)
 
 				vertex.Position = position;
 				vertex.DiffuseColor = { 1.0f, 1.0f, 1.0f };
-				vertex.Normal = vertices[indices[2]];
+				vertex.Normal = normals[indices[2]];
+
+				vertexData.push_back(vertex);
 			}
 
-			vertexData.push_back(vertex);
 
 		}
 

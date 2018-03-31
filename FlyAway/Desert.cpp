@@ -7,9 +7,9 @@ fa::Desert::Desert()
 	m_Perlin->SetPersistance(0.25f);
 }
 
-fa::BiomeDescriptor fa::Desert::GenerateAtXZ(float x, float z)
+fa::BiomeTerrainDescriptor fa::Desert::DescribeTerrainAtXY(float x, float z)
 {
-	BiomeDescriptor result;
+	BiomeTerrainDescriptor result;
 
 	result.TerrainHeight = m_Perlin->Sample({ x, z }) * 50.0f;
 	result.TerrainColor = { 0.8f, 0.7f, 0.1f };

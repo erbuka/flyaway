@@ -18,8 +18,8 @@ fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds
 	m_Adjacency[Up] = new Vertexf[m_VerticesX];
 	m_Adjacency[Down] = new Vertexf[m_VerticesX];
 
-	float tileWidth = bounds.Width() / divisionsX;
-	float tileDepth = bounds.Depth() / divisionsZ;
+	m_TileWidth = bounds.Width() / divisionsX;
+	m_TileDepth = bounds.Depth() / divisionsZ;
 
 	// Create vertices
 	for (int z = 0; z < m_VerticesZ; z++)
@@ -27,9 +27,9 @@ fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds
 		for (int x = 0; x < m_VerticesX; x++)
 		{
 			m_Vertices[z * m_VerticesX + x].Position = {
-				bounds.Min.X + tileWidth * x,
+				bounds.Min.X + m_TileWidth * x,
 				0,
-				bounds.Min.Z + tileDepth * z
+				bounds.Min.Z + m_TileDepth * z
 			};
 		}
 	}
@@ -53,14 +53,14 @@ fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds
 	// Create adjacency vertices
 	for (int x = 0; x < m_VerticesX; x++)
 	{
-		m_Adjacency[Up][x].Position = { m_Bounds.Min.X + x * tileWidth, 0, m_Bounds.Min.Z - tileDepth };
-		m_Adjacency[Down][x].Position = { m_Bounds.Min.X + x * tileWidth, 0, m_Bounds.Max.Z + tileDepth };
+		m_Adjacency[Up][x].Position = { m_Bounds.Min.X + x * m_TileWidth, 0, m_Bounds.Min.Z - m_TileDepth };
+		m_Adjacency[Down][x].Position = { m_Bounds.Min.X + x * m_TileWidth, 0, m_Bounds.Max.Z + m_TileDepth };
 	}
 
 	for (int z = 0; z < m_VerticesZ; z++)
 	{
-		m_Adjacency[Left][z].Position = { m_Bounds.Min.X - tileWidth, 0, m_Bounds.Min.Z + z * tileDepth };
-		m_Adjacency[Right][z].Position = { m_Bounds.Max.X + tileWidth, 0, m_Bounds.Min.Z + z * tileDepth };
+		m_Adjacency[Left][z].Position = { m_Bounds.Min.X - m_TileWidth, 0, m_Bounds.Min.Z + z * m_TileDepth };
+		m_Adjacency[Right][z].Position = { m_Bounds.Max.X + m_TileWidth, 0, m_Bounds.Min.Z + z * m_TileDepth };
 	}
 
 
@@ -81,6 +81,11 @@ fa::Terrain::~Terrain()
 	}
 
 	delete[] m_Adjacency;
+
+	for (auto sceneObj : m_SceneObjects)
+	{
+		delete sceneObj;
+	}
 
 }
 
@@ -180,6 +185,35 @@ fa::Vertexf & fa::Terrain::operator[](int index)
 fa::Vertexf & fa::Terrain::At(int index)
 {
 	return (*this)[index];
+}
+
+float fa::Terrain::GetHeightAt(const Vector3f & v) const
+{
+
+	
+	int v0x = (int)((v.X - m_Bounds.Min.X) / m_TileWidth);
+	int v0z = (int)((v.Z - m_Bounds.Min.Z) / m_TileDepth);
+	int v1x = v0x + 1, v1z = v0z + 1;
+
+	Vertexf& v00 = m_Vertices[v0z * m_VerticesX + v0x];
+	Vertexf& v01 = m_Vertices[v0z * m_VerticesX + v1x];
+	Vertexf& v10 = m_Vertices[v1z * m_VerticesX + v0x];
+	Vertexf& v11 = m_Vertices[v1z * m_VerticesX + v1x];
+
+	float tx = (v.X - v00.Position.X) / m_TileWidth;
+	float tz = (v.Z - v00.Position.Z) / m_TileDepth;
+
+	return Util::Lerp(
+		Util::Lerp(v00.Position.Y, v01.Position.Y, tx),
+		Util::Lerp(v10.Position.Y, v11.Position.Y, tx),
+		tz
+		);
+
+}
+
+std::vector<fa::SceneObject*>& fa::Terrain::GetSceneObjects()
+{
+	return m_SceneObjects;
 }
 
 fa::BoundingBox3f & fa::Terrain::GetBounds()

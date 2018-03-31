@@ -70,6 +70,13 @@ GLuint fa::Engine::GetProgram(std::string key)
 	return (*program).second;
 }
 
+fa::Model * fa::Engine::GetModel(std::string key)
+{
+	auto model = m_Models.find(key);
+	Util::NotZeroFail(model == m_Models.end());
+	return (*model).second;
+}
+
 void fa::Engine::Render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

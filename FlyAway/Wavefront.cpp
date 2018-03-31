@@ -1,7 +1,7 @@
 #include "Wavefront.h"
 #include <sstream>
 #include <stdexcept>
-
+#include <stdio.h>
 class WFToken
 {
 public:
@@ -335,6 +335,52 @@ fa::Wavefront fa::Wavefront::Parse(std::string source)
 	}
 	
 	return result;
+}
+
+std::string fa::Wavefront::Encode() const
+{
+	std::stringstream ss;
+	char buffer[1024];
+
+	for (auto vertex : m_Vertices)
+	{
+		sprintf_s(buffer, "v %f %f %f", vertex.X, vertex.Y, vertex.Z);
+		ss << buffer << std::endl;
+	}
+
+	for (auto normal : m_Normals)
+	{
+		sprintf_s(buffer, "vn %f %f %f", normal.X, normal.Y, normal.Z);
+		ss << buffer << std::endl;
+	}
+
+	for (auto texCoord : m_TexCoords)
+	{
+		sprintf_s(buffer, "vt %f %f", texCoord.X, texCoord.Y);
+		ss << buffer << std::endl;
+	}
+
+	for (auto group : m_Groups)
+	{
+		ss << "g " << group.first << std::endl;
+
+		for (auto face : group.second.Faces)
+		{
+			ss << "f";
+
+			for (auto vertex : face)
+			{
+				sprintf_s(buffer, " %d/%d/%d", vertex[0] + 1, vertex[1] + 1, vertex[2] + 1);
+				ss << buffer;
+			}
+
+			ss << std::endl;
+
+		}
+
+	}
+
+	return ss.str();
 }
 
 fa::Wavefront::Group & fa::Wavefront::GetGroup(std::string name, bool create)

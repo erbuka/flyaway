@@ -12,7 +12,8 @@ namespace fa
 	public:
 		GreenHills();
 		~GreenHills();
-		virtual BiomeDescriptor GenerateAtXZ(float x, float z) override;
+		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain) override;
+		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
 		Perlin * m_Perlin;
 		Perlin * m_ColorPerlin;

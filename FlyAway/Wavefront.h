@@ -16,11 +16,12 @@ namespace fa
 
 		struct Group
 		{
-			std::string Name;
 			std::vector<Face> Faces;
 		};
 
 		static Wavefront Parse(std::string source);
+
+		std::string Encode() const;
 
 		Group& GetGroup(std::string name, bool create = false);
 

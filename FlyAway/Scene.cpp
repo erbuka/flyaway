@@ -3,6 +3,8 @@
 #include "GreeenHills.h"
 #include "Desert.h"
 #include "Terrain.h"
+#include "SceneObject.h"
+#include "Model.h"
 #include <vector>
 #include <future>
 
@@ -31,13 +33,11 @@ fa::Scene::~Scene()
 void fa::Scene::Update(float elapsedTime)
 {
 
-
-
 	// Update Camera Position
 	if (m_CameraWaypoints.size() > 0)
 	{
 		bool hit;
-		m_CameraPosition = m_CameraPosition.MoveTowards(m_CameraWaypoints[0], elapsedTime * 100, hit);
+		m_CameraPosition = m_CameraPosition.MoveTowards(m_CameraWaypoints[0], elapsedTime * 10, hit);
 		if (hit)
 		{
 			m_CameraWaypoints.erase(m_CameraWaypoints.begin());
@@ -58,22 +58,35 @@ void fa::Scene::Render()
 	m_ModelView.LoadIdentity();
 	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, -m_CameraPosition.Z);
 
-	auto mvMat = m_ModelView.Current();
-	auto prMat = m_Projection.Current();
-
 	auto basicProgram = m_Engine->GetProgram("basic");
+
+	GLint prLoc = glGetUniformLocation(basicProgram, "in_ProjectionMatrix");
+	GLint mvLoc = glGetUniformLocation(basicProgram, "in_ModelViewMatrix");
 
 	glUseProgram(basicProgram);
 
-	glUniformMatrix4fv(glGetUniformLocation(basicProgram, "in_ProjectionMatrix"), 1, GL_TRUE, prMat.Ptr());
-	glUniformMatrix4fv(glGetUniformLocation(basicProgram, "in_ModelViewMatrix"), 1, GL_TRUE, mvMat.Ptr());
-
-
 	for (auto terrain : m_Terrain)
 	{
+
+		glUniformMatrix4fv(prLoc, 1, GL_TRUE, m_Projection.Current().Ptr());
+		glUniformMatrix4fv(mvLoc, 1, GL_TRUE, m_ModelView.Current().Ptr());
+
 		glBindVertexArray(terrain->GetVAO());
 		glDrawElements(GL_TRIANGLES, terrain->GetIndicescount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+		for (auto sceneObj : terrain->GetSceneObjects())
+		{
+			m_ModelView.Push();
+			m_ModelView.Multiply(sceneObj->GetTransform());
+
+			glUniformMatrix4fv(prLoc, 1, GL_TRUE, m_Projection.Current().Ptr());
+			glUniformMatrix4fv(mvLoc, 1, GL_TRUE, m_ModelView.Current().Ptr());
+
+			sceneObj->GetModel()->Render();
+
+			m_ModelView.Pop();
+		}
 	}
 
 	glUseProgram(0);
@@ -128,7 +141,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 
 
-	// Generate new Biomes (TEMP)
+	// GenerateTerrain new Biomes (TEMP)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
@@ -136,7 +149,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 	}
 
 
-	// Generate new world chunks
+	// GenerateTerrain new world chunks
 	while (m_Terrain.size() < m_WorldChunks)
 	{
 
@@ -144,38 +157,9 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		Terrain * terrain = new Terrain(m_Width, m_ChunkDepth, bounds);
 
 		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 0.01f);
+		m_BiomeInterpolator->GenerateTerrain(terrain);
+		m_BiomeInterpolator->GenerateSceneObjects(m_Engine, terrain);
 
-		// Generate Adjacencies
-		for (int z = 0; z < terrain->GetVerticesZ(); z++)
-		{	
-			auto& left = terrain->GetAdjacency(Terrain::Left, z);
-			auto& right = terrain->GetAdjacency(Terrain::Right, z);
-
-			left.Position.Y = m_BiomeInterpolator->GenerateAt(left.Position).TerrainHeight;
-			right.Position.Y = m_BiomeInterpolator->GenerateAt(right.Position).TerrainHeight;
-
-		}
-
-		for (int x = 0; x < terrain->GetVerticesX(); x++)
-		{
-			auto& up = terrain->GetAdjacency(Terrain::Up, x);
-			auto& down = terrain->GetAdjacency(Terrain::Down, x);
-
-			up.Position.Y = m_BiomeInterpolator->GenerateAt(up.Position).TerrainHeight;
-			down.Position.Y = m_BiomeInterpolator->GenerateAt(down.Position).TerrainHeight;
-		}
-
-		// Generate Vertices
-		for (int i = 0; i < terrain->GetVerticesCount(); i++)
-		{
-			auto& vertex = (*terrain)[i];
-			auto biomeDescr = m_BiomeInterpolator->GenerateAt(vertex.Position);
-			vertex.Position.Y = biomeDescr.TerrainHeight;
-			vertex.DiffuseColor = biomeDescr.TerrainColor;
-		}
-
-
-		//m_CameraWaypoints.push_back().);
 
 		terrain->ComputeNormals();
 		terrain->GenerateVertexArray();
@@ -183,7 +167,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		m_Terrain.push_back(terrain);
 
 		// Insert camera waypoint
-		auto biomeDescr = m_BiomeInterpolator->GenerateAt(bounds.Center());
+		auto biomeDescr = m_BiomeInterpolator->DescribeTerrainAt(bounds.Center());
 		m_CameraWaypoints.push_back(bounds.Center() + Vector3f{0, 3 + biomeDescr.TerrainHeight, 0});
 
 		m_BiomeInterpolator->EndInterpolation();

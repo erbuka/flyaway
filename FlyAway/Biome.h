@@ -5,7 +5,10 @@
 namespace fa
 {
 
-	struct BiomeDescriptor
+	class Terrain;
+	class Engine;
+
+	struct BiomeTerrainDescriptor
 	{
 		float TerrainHeight;
 		Vector3f TerrainColor;
@@ -14,8 +17,10 @@ namespace fa
 	class Biome
 	{
 	public:
-		virtual BiomeDescriptor GenerateAt(const Vector3f& position);
-		virtual BiomeDescriptor GenerateAtXZ(float x, float z) = 0;
+		virtual void GenerateTerrain(Terrain * terrain);
+		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain);
+		virtual BiomeTerrainDescriptor DescribeTerrainAt(const Vector3f& position);
+		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) = 0;
 	};
 
 	class BiomeInterpolator : public Biome
@@ -36,7 +41,9 @@ namespace fa
 
 		float GetInterpolationValue() const;
 
-		virtual BiomeDescriptor GenerateAtXZ(float x, float z);
+		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain) override;
+
+		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z);
 
 	private:
 		Biome * m_CurrentBiome, *m_NextBiome;

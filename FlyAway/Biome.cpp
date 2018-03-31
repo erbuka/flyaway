@@ -1,10 +1,49 @@
 #include "Biome.h"
 #include "Util.h"
+#include "Terrain.h"
 #include <cassert>
 
-fa::BiomeDescriptor fa::Biome::GenerateAt(const Vector3f& position)
+void fa::Biome::GenerateTerrain(Terrain * terrain)
 {
-	return GenerateAtXZ(position.X, position.Z);
+
+	// GenerateTerrain Adjacencies
+	for (int z = 0; z < terrain->GetVerticesZ(); z++)
+	{
+		auto& left = terrain->GetAdjacency(Terrain::Left, z);
+		auto& right = terrain->GetAdjacency(Terrain::Right, z);
+
+		left.Position.Y = DescribeTerrainAt(left.Position).TerrainHeight;
+		right.Position.Y = DescribeTerrainAt(right.Position).TerrainHeight;
+
+	}
+
+	for (int x = 0; x < terrain->GetVerticesX(); x++)
+	{
+		auto& up = terrain->GetAdjacency(Terrain::Up, x);
+		auto& down = terrain->GetAdjacency(Terrain::Down, x);
+
+		up.Position.Y = DescribeTerrainAt(up.Position).TerrainHeight;
+		down.Position.Y = DescribeTerrainAt(down.Position).TerrainHeight;
+	}
+
+	// GenerateTerrain Vertices
+	for (int i = 0; i < terrain->GetVerticesCount(); i++)
+	{
+		auto& vertex = (*terrain)[i];
+		auto biomeDescr = DescribeTerrainAt(vertex.Position);
+		vertex.Position.Y = biomeDescr.TerrainHeight;
+		vertex.DiffuseColor = biomeDescr.TerrainColor;
+	}
+}
+
+void fa::Biome::GenerateSceneObjects(Engine * engine, Terrain * terrain)
+{
+
+}
+
+fa::BiomeTerrainDescriptor fa::Biome::DescribeTerrainAt(const Vector3f& position)
+{
+	return DescribeTerrainAtXY(position.X, position.Z);
 }
 
 fa::BiomeInterpolator::BiomeInterpolator(Biome * currentBiome) :
@@ -20,15 +59,20 @@ float fa::BiomeInterpolator::GetInterpolationValue() const
 	return m_InterpolationValue;
 }
 
-fa::BiomeDescriptor fa::BiomeInterpolator::GenerateAtXZ(float x, float z)
+void fa::BiomeInterpolator::GenerateSceneObjects(Engine * engine, Terrain * terrain)
+{
+	m_CurrentBiome->GenerateSceneObjects(engine, terrain);
+}
+
+fa::BiomeTerrainDescriptor fa::BiomeInterpolator::DescribeTerrainAtXY(float x, float z)
 {
 	if (IsStable())
 	{
-		return m_CurrentBiome->GenerateAtXZ(x, z);
+		return m_CurrentBiome->DescribeTerrainAtXY(x, z);
 	}
 	else
 	{
-		BiomeDescriptor result;
+		BiomeTerrainDescriptor result;
 
 		// All z's are negative and:
 		// -> z <= m_StartZ
@@ -39,8 +83,8 @@ fa::BiomeDescriptor fa::BiomeInterpolator::GenerateAtXZ(float x, float z)
 		double tFrom = m_InterpolationValue;
 		double tTo = std::min(1.0, m_InterpolationValue + m_InterpolationStep);
 
-		auto currentDescr = m_CurrentBiome->GenerateAtXZ(x, z);
-		auto nextDescr = m_NextBiome->GenerateAtXZ(x, z);
+		auto currentDescr = m_CurrentBiome->DescribeTerrainAtXY(x, z);
+		auto nextDescr = m_NextBiome->DescribeTerrainAtXY(x, z);
 
 		result.TerrainHeight = Util::Lerp(currentDescr.TerrainHeight, nextDescr.TerrainHeight, Util::Lerp(tFrom, tTo, t));
 

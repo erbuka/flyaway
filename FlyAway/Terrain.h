@@ -6,6 +6,9 @@
 
 namespace fa
 {
+
+	class SceneObject;
+
 	class Terrain
 	{
 	public:
@@ -35,13 +38,19 @@ namespace fa
 		Vertexf& operator[](int index);
 		Vertexf& At(int index);
 
+		float GetHeightAt(const Vector3f& v) const;
+
+		std::vector<SceneObject*>& GetSceneObjects();
+
 		BoundingBox3f& GetBounds();
 
 	private:
 		int m_VerticesCount, m_VerticesX, m_VerticesZ;
+		float m_TileWidth, m_TileDepth;
 		BoundingBox3f m_Bounds;
 		Vertexf * m_Vertices, ** m_Adjacency;
 		GLuint m_VB, m_IB, m_VAO;
 		std::vector<GLuint> m_Indices;
+		std::vector<SceneObject*> m_SceneObjects;
 	};
 }

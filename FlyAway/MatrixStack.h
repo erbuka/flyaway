@@ -12,17 +12,17 @@ namespace fa
 	public:
 		MatrixStack4()
 		{
-			m_Stack.push(Matrix4<T>());
+
 		}
 
 		~MatrixStack4()
 		{
-			m_Stack.empty();
+
 		}
 
-		Matrix4<T>& Current()
+		Matrix4<T> Current()
 		{
-			return m_Stack.top();
+			return m_Stack[m_CurrentPosition];
 		}
 
 		void Translate(Vector3<T>& v)
@@ -38,7 +38,7 @@ namespace fa
 			translationMatrix.Components[7] = y;
 			translationMatrix.Components[11] = z;
 
-			m_Stack.top() = m_Stack.top() * translationMatrix;
+			Multiply(translationMatrix);
 
 		}
 
@@ -69,27 +69,37 @@ namespace fa
 			perspectiveMatrix.Components[14] = -1.0f;
 			perspectiveMatrix.Components[15] = 0.0f;
 
-			m_Stack.top() = m_Stack.top() * perspectiveMatrix;
+			Multiply(perspectiveMatrix);
+
 		}
 
 		void LoadIdentity()
 		{
-			m_Stack.top() = Matrix4<T>::Identity();
+			m_Stack[m_CurrentPosition] = Matrix4<T>::Identity();
+		}
+
+		void Multiply(const Matrix4<T>& matrix)
+		{
+			m_Stack[m_CurrentPosition] = m_Stack[m_CurrentPosition] * matrix;
 		}
 
 		void Push()
 		{
-			m_Stack.push(m_Stack.top());
+			Util::NotZeroFail(m_CurrentPosition >= StackSize - 1);
+			m_CurrentPosition++;
+			m_Stack[m_CurrentPosition] = m_Stack[m_CurrentPosition - 1];
 		}
 
 		void Pop()
 		{
-			Util::ZeroFail(m_Stack.size());
-			m_Stack.pop();
+			Util::NotZeroFail(m_CurrentPosition == 0);
+			m_CurrentPosition--;
 		}
 
 	private:
-		std::stack<Matrix4<T>> m_Stack;
+		static constexpr int StackSize = 16;
+		int m_CurrentPosition;
+		Matrix4<T> m_Stack[StackSize];
 	};
 
 

@@ -10,7 +10,7 @@ namespace fa
 	{
 	public:
 		Desert();
-		virtual BiomeDescriptor GenerateAtXZ(float x, float z) override;
+		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
 		Perlin * m_Perlin;
 	};

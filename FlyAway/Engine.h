@@ -16,6 +16,7 @@ namespace fa
 
 	class Scene;
 	class WavefrontModel;
+	class Model;
 
 	class Engine
 	{
@@ -27,6 +28,7 @@ namespace fa
 		void Start();
 
 		GLuint GetProgram(std::string key);
+		Model * GetModel(std::string key);
 
 	private:
 
