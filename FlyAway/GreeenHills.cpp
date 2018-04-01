@@ -29,24 +29,12 @@ fa::GreenHills::GreenHills()
 fa::GreenHills::~GreenHills()
 {
 	delete m_Perlin;
+	delete m_ColorPerlin;
 }
 
-void fa::GreenHills::GenerateSceneObjects(Engine * engine, Terrain * terrain)
+fa::SceneObject * fa::GreenHills::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
 {
-	auto model = engine->GetModel(Models::Cube);
-	auto bounds = terrain->GetBounds();
-	auto &objects = terrain->GetSceneObjects();
-	for (float x = bounds.Min.X; x < bounds.Max.X; x += 2.5f)
-	{
-		for (float z = bounds.Min.Z; z < bounds.Max.Z; z += 2.5f)
-		{
-			if (Random::NextValue<float>() > 0.8f)
-			{
-				objects.push_back(new SceneObject(model, Vector3f(x, terrain->GetHeightAt({x, 0, z}), z)));
-			}
-		}
-	}
-
+	return nullptr;
 }
 
 fa::BiomeTerrainDescriptor fa::GreenHills::DescribeTerrainAtXY(float x, float z)

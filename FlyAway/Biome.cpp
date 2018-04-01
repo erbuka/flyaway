@@ -34,11 +34,25 @@ void fa::Biome::GenerateTerrain(Terrain * terrain)
 		vertex.Position.Y = biomeDescr.TerrainHeight;
 		vertex.DiffuseColor = biomeDescr.TerrainColor;
 	}
+
+	terrain->GenerateVertexArray();
+
+	auto& sceneObjGrid = terrain->GetSceneObjects();
+
+	for (int x = 0; x < sceneObjGrid.GetCellsX(); x++)
+	{
+		for (int z = 0; z < sceneObjGrid.GetCellsZ(); z++)
+		{
+			auto& cell = sceneObjGrid.At(x, z);
+			cell.Object = GenerateSceneObject(terrain, cell.Bounds);
+		}
+	}
+
 }
 
-void fa::Biome::GenerateSceneObjects(Engine * engine, Terrain * terrain)
+fa::SceneObject * fa::Biome::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
 {
-
+	return nullptr;
 }
 
 fa::BiomeTerrainDescriptor fa::Biome::DescribeTerrainAt(const Vector3f& position)
@@ -57,11 +71,6 @@ fa::BiomeInterpolator::BiomeInterpolator(Biome * currentBiome) :
 float fa::BiomeInterpolator::GetInterpolationValue() const
 {
 	return m_InterpolationValue;
-}
-
-void fa::BiomeInterpolator::GenerateSceneObjects(Engine * engine, Terrain * terrain)
-{
-	m_CurrentBiome->GenerateSceneObjects(engine, terrain);
 }
 
 fa::BiomeTerrainDescriptor fa::BiomeInterpolator::DescribeTerrainAtXY(float x, float z)

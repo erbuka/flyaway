@@ -75,6 +75,7 @@ void fa::Scene::Render()
 		glDrawElements(GL_TRIANGLES, terrain->GetIndicescount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		/*
 		for (auto sceneObj : terrain->GetSceneObjects())
 		{
 			m_ModelView.Push();
@@ -87,6 +88,7 @@ void fa::Scene::Render()
 
 			m_ModelView.Pop();
 		}
+		*/
 	}
 
 	glUseProgram(0);
@@ -158,11 +160,6 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 0.01f);
 		m_BiomeInterpolator->GenerateTerrain(terrain);
-		m_BiomeInterpolator->GenerateSceneObjects(m_Engine, terrain);
-
-
-		terrain->ComputeNormals();
-		terrain->GenerateVertexArray();
 
 		m_Terrain.push_back(terrain);
 

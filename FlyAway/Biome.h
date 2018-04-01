@@ -7,6 +7,7 @@ namespace fa
 
 	class Terrain;
 	class Engine;
+	class SceneObject;
 
 	struct BiomeTerrainDescriptor
 	{
@@ -18,7 +19,7 @@ namespace fa
 	{
 	public:
 		virtual void GenerateTerrain(Terrain * terrain);
-		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain);
+		virtual SceneObject* GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds);
 		virtual BiomeTerrainDescriptor DescribeTerrainAt(const Vector3f& position);
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) = 0;
 	};
@@ -40,8 +41,6 @@ namespace fa
 		void EndInterpolation();
 
 		float GetInterpolationValue() const;
-
-		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain) override;
 
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z);
 

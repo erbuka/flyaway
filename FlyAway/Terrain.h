@@ -8,6 +8,38 @@ namespace fa
 {
 
 	class SceneObject;
+	class SceneObjectGrid;
+	class Terrain;
+	
+	class SceneObjectGrid
+	{
+	public:
+
+		static constexpr float CellWidth = 2.0f;
+		static constexpr float CellDepth = 2.0f;
+
+		struct CellContent
+		{
+			BoundingBox3f Bounds;
+			SceneObject * Object;
+		};
+
+		CellContent& At(int x, int z);
+
+		inline int GetCellsX() { return m_CellsX; }
+		inline int GetCellsZ() { return m_CellsZ; }
+
+		SceneObjectGrid& operator=(SceneObjectGrid&& other);
+
+		SceneObjectGrid(Terrain * terrain);
+		SceneObjectGrid(SceneObjectGrid&& other);
+		SceneObjectGrid();
+		~SceneObjectGrid();
+	private:
+		int m_CellsX, m_CellsZ;
+		Terrain * m_Terrain;
+		CellContent * m_Data;
+	};
 
 	class Terrain
 	{
@@ -40,7 +72,7 @@ namespace fa
 
 		float GetHeightAt(const Vector3f& v) const;
 
-		std::vector<SceneObject*>& GetSceneObjects();
+		SceneObjectGrid& GetSceneObjects();
 
 		BoundingBox3f& GetBounds();
 
@@ -51,6 +83,9 @@ namespace fa
 		Vertexf * m_Vertices, ** m_Adjacency;
 		GLuint m_VB, m_IB, m_VAO;
 		std::vector<GLuint> m_Indices;
-		std::vector<SceneObject*> m_SceneObjects;
+		SceneObjectGrid m_SceneObjectGrid;
 	};
+
+	
+
 }

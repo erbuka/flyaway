@@ -64,15 +64,20 @@ fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds
 	}
 
 
+	// Generate SceneObject grid
+	m_SceneObjectGrid = SceneObjectGrid(this);
+
 
 }
 
 fa::Terrain::~Terrain()
 {
+
 	glFastFail(glDeleteBuffers(1, &m_VB));
 	glFastFail(glDeleteBuffers(1, &m_IB));
 	glFastFail(glDeleteVertexArrays(1, &m_VAO));
-
+	
+	
 	delete[] m_Vertices;
 
 	for (int i = 0; i < 4; i++)
@@ -81,12 +86,7 @@ fa::Terrain::~Terrain()
 	}
 
 	delete[] m_Adjacency;
-
-	for (auto sceneObj : m_SceneObjects)
-	{
-		delete sceneObj;
-	}
-
+	
 }
 
 int fa::Terrain::GetVerticesX() const
@@ -121,6 +121,8 @@ fa::Vertexf & fa::Terrain::GetAdjacency(EAdjacency adjacency, int index)
 
 void fa::Terrain::GenerateVertexArray()
 {
+
+	ComputeNormals();
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
@@ -211,12 +213,91 @@ float fa::Terrain::GetHeightAt(const Vector3f & v) const
 
 }
 
-std::vector<fa::SceneObject*>& fa::Terrain::GetSceneObjects()
+fa::SceneObjectGrid & fa::Terrain::GetSceneObjects()
 {
-	return m_SceneObjects;
+	return m_SceneObjectGrid;
 }
 
 fa::BoundingBox3f & fa::Terrain::GetBounds()
 {
 	return m_Bounds;
+}
+
+
+fa::SceneObjectGrid::CellContent & fa::SceneObjectGrid::At(int x, int z)
+{
+	return m_Data[z * m_CellsX + x];
+}
+
+
+fa::SceneObjectGrid & fa::SceneObjectGrid::operator=(SceneObjectGrid && other)
+{
+	m_CellsX = other.m_CellsX;
+	m_CellsZ = other.m_CellsZ;
+	m_Terrain = other.m_Terrain;
+	m_Data = other.m_Data;
+	other.m_CellsX = 0;
+	other.m_CellsZ = 0;
+	other.m_Terrain = nullptr;
+	other.m_Data = nullptr;
+	return *this;
+}
+
+fa::SceneObjectGrid::SceneObjectGrid(Terrain * terrain)
+{
+	BoundingBox3f bounds = terrain->GetBounds();
+
+	m_CellsX = bounds.Width() / CellWidth;
+	m_CellsZ = bounds.Depth() / CellDepth;
+
+	m_Data = new CellContent[m_CellsX * m_CellsZ];
+
+	for (int x = 0; x < m_CellsX; x++)
+	{
+		for (int z = 0; z < m_CellsZ; z++)
+		{
+			m_Data[z * m_CellsX + x] = {
+				{
+					Vector3f(bounds.Min.X + x * CellWidth, 0, bounds.Min.Z + z * CellDepth),
+					Vector3f(bounds.Min.X + (x + 1) * CellWidth, 0, bounds.Min.Z + (z + 1) * CellDepth)
+				},
+				nullptr
+			};
+		}
+	}
+
+}
+
+fa::SceneObjectGrid::SceneObjectGrid(SceneObjectGrid && other)
+{
+	m_CellsX = other.m_CellsX;
+	m_CellsZ = other.m_CellsZ;
+	m_Terrain = other.m_Terrain;
+	m_Data = other.m_Data;
+	other.m_CellsX = 0;
+	other.m_CellsZ = 0;
+	other.m_Terrain = nullptr;
+	other.m_Data = nullptr;
+}
+
+fa::SceneObjectGrid::SceneObjectGrid() :
+	m_CellsX(0),
+	m_CellsZ(0),
+	m_Data(nullptr),
+	m_Terrain(nullptr)
+{
+}
+
+fa::SceneObjectGrid::~SceneObjectGrid()
+{
+	if (m_Data != nullptr) {
+		for (int i = 0; i < m_CellsX * m_CellsZ; i++)
+		{
+			if (m_Data[i].Object != nullptr)
+			{
+				delete m_Data[i].Object;
+			}
+		}
+		delete[] m_Data;
+	}
 }

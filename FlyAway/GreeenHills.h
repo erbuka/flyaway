@@ -12,7 +12,7 @@ namespace fa
 	public:
 		GreenHills();
 		~GreenHills();
-		virtual void GenerateSceneObjects(Engine * engine, Terrain * terrain) override;
+		virtual SceneObject * GenerateSceneObject(Terrain* terrain, BoundingBox3f bounds) override;
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
 		Perlin * m_Perlin;

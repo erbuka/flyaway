@@ -51,7 +51,7 @@ void fa::Engine::Init()
 	LoadModels();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, 300.0f, 5.0f, 1.0f, 300.0f);
+	m_Scene = new Scene(this, 300.0f, 6.0f, 1.0f, 300.0f);
 
 	// Init GL Parameters
 	glEnable(GL_DEPTH_TEST);
