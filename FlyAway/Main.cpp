@@ -11,16 +11,7 @@
 
 int main(int argc, char ** argv)
 {	
-	GLFWwindow * window = nullptr;
-
-	fa::Util::ZeroFail(glfwInit());
-	fa::Util::ZeroFail(window = glfwCreateWindow(fa::CWidth, fa::CHeight, "Test", nullptr, nullptr));
-	glfwMakeContextCurrent(window);
-	fa::Util::NotZeroFail(glewInit());
-	fa::Engine engine(window);
-
-	engine.Start();
-
-
+	auto engine = fa::Engine::GetInstance();
+	engine->Start();
 	return 0;
 }

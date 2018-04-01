@@ -6,9 +6,29 @@
 #include "WavefrontModel.h"
 #include <chrono>
 
+
+fa::Engine * fa::Engine::m_Instance = nullptr;
+
 fa::Engine::Engine(GLFWwindow * window) : m_Window(window)
 {
 	Init();
+}
+
+fa::Engine * fa::Engine::GetInstance()
+{
+	if (m_Instance == nullptr)
+	{
+		GLFWwindow * window;
+		fa::Util::ZeroFail(glfwInit());
+		fa::Util::ZeroFail(window = glfwCreateWindow(fa::CWidth, fa::CHeight, "Test", nullptr, nullptr));
+		glfwMakeContextCurrent(window);
+		fa::Util::NotZeroFail(glewInit());
+		
+		m_Instance = new Engine(window);
+
+	}
+
+	return m_Instance;
 }
 
 fa::Engine::~Engine()
@@ -87,9 +107,27 @@ void fa::Engine::Render()
 void fa::Engine::LoadModels()
 {
 	Wavefront cube = Wavefront::Parse(Util::ReadFile("models/cube.obj"));
+	Wavefront cypress0 = Wavefront::Parse(Util::ReadFile("models/cypress0.obj"));
 
-	m_Models[Models::Cube] = WavefrontModel::Create(cube);
+	m_Models[Models::RedCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 0.0f, 0.0f) } });
+	m_Models[Models::WhiteCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 1.0f, 1.0f) } });
 
+	m_Models[Models::LightGreenCypress] = WavefrontModel::Create(
+		cypress0,
+		{
+			{ "leaves", Vector3f::GetColor(114, 163, 41) },
+			{ "log", Vector3f::GetColor(92, 43, 43) }
+		}
+	);
+
+
+	m_Models[Models::DarkGreenCypress] = WavefrontModel::Create(
+		cypress0,
+		{
+			{ "leaves", Vector3f::GetColor(59, 92, 10) },
+			{ "log", Vector3f::GetColor(92, 43, 43) }
+		}
+	);
 }
 
 void fa::Engine::Dispose()

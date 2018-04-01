@@ -10,7 +10,7 @@ const float levels[4] = float[4]( 0.0, 0.25, 0.5, 0.75 );
 
 void main()
 {
-	float diffuseFactor = dot(fs_Normal, normalize(-fs_Position)) < 0.1 ?
+	float diffuseFactor = dot(fs_Normal, normalize(-fs_Position)) < 0.05 ?
 		0.0 : max(0.0, dot(normalize(fs_Normal), lightDirection));		
 	gl_FragColor = vec4(fs_Color * diffuseFactor, 1.0);
 

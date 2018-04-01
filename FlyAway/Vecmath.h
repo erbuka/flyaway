@@ -3,6 +3,7 @@
 #include <array>
 #include <ostream>
 #include <cmath>
+#include "Util.h"
 namespace fa {
 	template<typename T>
 	union Vector3
@@ -191,6 +192,16 @@ namespace fa {
 				1.0f, 0.0f, 0.0f, t.X,
 				0.0f, 1.0f, 0.0f, t.Y,
 				0.0f, 0.0f, 1.0f, t.Z,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+		}
+
+		static Matrix4 Scale(const Vector3<T>& s)
+		{
+			return Matrix4(std::array<T, 16> {
+				s.X, 0.0f, 0.0f, 0.0f,
+				0.0f, s.Y, 0.0f, 0.0f,
+				0.0f, 0.0f, s.Z, 0.0f,
 				0.0f, 0.0f, 0.0f, 1.0f
 			});
 		}

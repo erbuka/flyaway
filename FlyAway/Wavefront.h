@@ -13,11 +13,7 @@ namespace fa
 	public:
 		typedef std::array<int, 3> FaceVertex;
 		typedef std::vector<FaceVertex> Face;
-
-		struct Group
-		{
-			std::vector<Face> Faces;
-		};
+		typedef std::vector<Face> Group;
 
 		static Wavefront Parse(std::string source);
 

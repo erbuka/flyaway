@@ -1,7 +1,7 @@
 #include "WavefrontModel.h"
 #include "Util.h"
 
-fa::WavefrontModel * fa::WavefrontModel::Create(Wavefront & wavefront)
+fa::WavefrontModel * fa::WavefrontModel::Create(Wavefront & wavefront, std::map<std::string, Vector3f> colorMap)
 {
 	auto& groups = wavefront.GetGroups();
 	auto& vertices = wavefront.GetVertices();
@@ -20,7 +20,10 @@ fa::WavefrontModel * fa::WavefrontModel::Create(Wavefront & wavefront)
 		std::vector<Vertexf> vertexData;
 		GLuint vao, vbo;
 
-		for (auto &face : g.second.Faces)
+		Vector3f color = colorMap.find(g.first) != colorMap.end() ?
+			colorMap[g.first] : Vector3f(1.0f, 1.0f, 1.0f);
+
+		for (auto &face : g.second)
 		{
 			if (face.size() != 3)
 			{
@@ -44,7 +47,7 @@ fa::WavefrontModel * fa::WavefrontModel::Create(Wavefront & wavefront)
 				bounds.Max.Z = std::fmaxf(bounds.Max.Z, position.Z);
 
 				vertex.Position = position;
-				vertex.DiffuseColor = { 1.0f, 1.0f, 1.0f };
+				vertex.DiffuseColor = color;
 				vertex.Normal = normals[indices[2]];
 
 				vertexData.push_back(vertex);

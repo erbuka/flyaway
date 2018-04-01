@@ -9,7 +9,7 @@ namespace fa
 	class WavefrontModel : public Model
 	{
 	public:
-		static WavefrontModel * Create(Wavefront& wavefront);
+		static WavefrontModel * Create(Wavefront& wavefront, std::map<std::string, Vector3f> colorMap = {});
 		
 		~WavefrontModel();
 

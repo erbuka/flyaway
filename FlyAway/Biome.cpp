@@ -73,6 +73,21 @@ float fa::BiomeInterpolator::GetInterpolationValue() const
 	return m_InterpolationValue;
 }
 
+fa::SceneObject * fa::BiomeInterpolator::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
+{
+	if (IsStable())
+	{
+		return m_CurrentBiome->GenerateSceneObject(terrain, bounds);
+	}
+	else
+	{
+
+		return Random::NextValue<float>() < m_InterpolationValue ?
+			m_NextBiome->GenerateSceneObject(terrain, bounds) :
+			m_CurrentBiome->GenerateSceneObject(terrain, bounds);
+	}
+}
+
 fa::BiomeTerrainDescriptor fa::BiomeInterpolator::DescribeTerrainAtXY(float x, float z)
 {
 	if (IsStable())

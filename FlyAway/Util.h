@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <array>
+#include <map>
 #include "GL/glew.h"
 
 #define glFastFail(f) { f; Util::NotZeroFail(glGetError()); }
@@ -41,6 +42,43 @@ namespace fa
 	private:
 		std::vector<std::pair<float, T>> m_Values;
 	};
+
+	/*
+	template<typename T>
+	class RandomTreeNode
+	{
+	public:
+		using Inputs = std::map<std::string, float>;
+		using ProbabilityMap = std::map<float, RandomTreeNode>;
+		RandomTreeNode(T value): m_Leaf(true), m_Value(value) { }
+		RandomTreeNode(std::string inputName, ProbabilityMap map) : m_Map(map), m_InputName(inputName), m_Leaf(false) {}
+
+		T GetResult(Inputs&& inputs)
+		{
+			float input = inputs[m_InputName];
+			for (auto item = m_Map.rbegin(); item != m_Map.end(); item++)
+			{
+				if (input >= (*item).first)
+				{
+					if ((*item).second.m_Leaf)
+					{
+						return (*item).second.m_Value;
+					}
+					else
+					{
+						return (*item).second.GetResult(inputs);
+					}
+				}
+			}
+		}
+
+	private:
+		T m_Value;
+		bool m_Leaf;
+		std::string m_InputName;
+		ProbabilityMap m_Map;
+	};
+	*/
 
 	class Random
 	{

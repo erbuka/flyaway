@@ -317,7 +317,7 @@ fa::Wavefront fa::Wavefront::Parse(std::string source)
 			result.m_TexCoords.push_back(parseVector2f());
 			break;		
 		case WFToken::Face:
-			result.GetGroup(currentGroup, true).Faces.push_back(parseFace());
+			result.GetGroup(currentGroup, true).push_back(parseFace());
 			break;
 		case WFToken::Hash:
 			skipLine();
@@ -364,7 +364,7 @@ std::string fa::Wavefront::Encode() const
 	{
 		ss << "g " << group.first << std::endl;
 
-		for (auto face : group.second.Faces)
+		for (auto face : group.second)
 		{
 			ss << "f";
 

@@ -34,7 +34,16 @@ fa::GreenHills::~GreenHills()
 
 fa::SceneObject * fa::GreenHills::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
 {
-	return nullptr;
+	Engine * engine = Engine::GetInstance();
+	Model * model = engine->GetModel(Models::LightGreenCypress);
+	Vector3f center = bounds.Center();
+	float height = terrain->GetHeightAt(center);
+	float scale = Random::NextValue(0.7f, 1.1f);
+
+	float x = Random::NextFit(scale, bounds.Min.X, bounds.Max.X);
+	float z = Random::NextFit(scale, bounds.Min.Z, bounds.Max.Z);
+
+	return new SceneObject(model, { x, height, z }, { scale, scale, scale });
 }
 
 fa::BiomeTerrainDescriptor fa::GreenHills::DescribeTerrainAtXY(float x, float z)

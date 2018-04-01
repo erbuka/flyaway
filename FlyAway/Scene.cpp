@@ -37,7 +37,7 @@ void fa::Scene::Update(float elapsedTime)
 	if (m_CameraWaypoints.size() > 0)
 	{
 		bool hit;
-		m_CameraPosition = m_CameraPosition.MoveTowards(m_CameraWaypoints[0], elapsedTime * 10, hit);
+		m_CameraPosition = m_CameraPosition.MoveTowards(m_CameraWaypoints[0], elapsedTime * 50, hit);
 		if (hit)
 		{
 			m_CameraWaypoints.erase(m_CameraWaypoints.begin());
@@ -75,20 +75,26 @@ void fa::Scene::Render()
 		glDrawElements(GL_TRIANGLES, terrain->GetIndicescount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
-		/*
-		for (auto sceneObj : terrain->GetSceneObjects())
+		auto& sceneObjGrid = terrain->GetSceneObjects();
+
+		for (int x = 0; x < sceneObjGrid.GetCellsX(); x++)
 		{
-			m_ModelView.Push();
-			m_ModelView.Multiply(sceneObj->GetTransform());
+			for (int z = 0; z < sceneObjGrid.GetCellsZ(); z++)
+			{
+				auto sceneObj = sceneObjGrid.At(x, z).Object;
+				if (sceneObj != nullptr) {
+					m_ModelView.Push();
+					m_ModelView.Multiply(sceneObj->GetTransform());
 
-			glUniformMatrix4fv(prLoc, 1, GL_TRUE, m_Projection.Current().Ptr());
-			glUniformMatrix4fv(mvLoc, 1, GL_TRUE, m_ModelView.Current().Ptr());
+					glUniformMatrix4fv(prLoc, 1, GL_TRUE, m_Projection.Current().Ptr());
+					glUniformMatrix4fv(mvLoc, 1, GL_TRUE, m_ModelView.Current().Ptr());
 
-			sceneObj->GetModel()->Render();
+					sceneObj->GetModel()->Render();
 
-			m_ModelView.Pop();
+					m_ModelView.Pop();
+				}
+			}
 		}
-		*/
 	}
 
 	glUseProgram(0);
@@ -147,7 +153,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
-		m_BiomeInterpolator->PushBiome(new GreenHills());
+		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.5f ? (Biome*)new GreenHills() : (Biome*)new Desert());
 	}
 
 

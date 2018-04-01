@@ -10,6 +10,7 @@ namespace fa
 	{
 	public:
 		Desert();
+		virtual SceneObject * GenerateSceneObject(Terrain* terrain, BoundingBox3f bounds) override;
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
 		Perlin * m_Perlin;

@@ -11,7 +11,12 @@ namespace fa
 
 	namespace Models
 	{
-		constexpr char * Cube = "cube";
+
+		constexpr char * WhiteCube = "white_cube";
+		constexpr char * RedCube = "red_cube";
+
+		constexpr char * LightGreenCypress = "light_green_cypress";
+		constexpr char * DarkGreenCypress = "dark_green_cypress";
 	}
 
 	class Scene;
@@ -22,7 +27,8 @@ namespace fa
 	{
 	public:
 
-		Engine(GLFWwindow * window);
+		static Engine * GetInstance();
+
 		~Engine();
 
 		void Start();
@@ -32,6 +38,7 @@ namespace fa
 
 	private:
 
+		Engine(GLFWwindow * window);
 
 		void Init();
 		void Dispose();
@@ -46,5 +53,9 @@ namespace fa
 		std::map<std::string, GLuint> m_Programs;
 		std::map<std::string, WavefrontModel*> m_Models;
 		GLFWwindow * m_Window;
+
+		static Engine * m_Instance;
 	};
+
+
 }
