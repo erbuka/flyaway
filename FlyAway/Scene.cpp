@@ -153,7 +153,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
-		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.5f ? (Biome*)new GreenHills() : (Biome*)new Desert());
+		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() >= 0.0f ? (Biome*)new GreenHills() : (Biome*)new Desert());
 	}
 
 

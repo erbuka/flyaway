@@ -11,7 +11,7 @@ fa::Engine * fa::Engine::m_Instance = nullptr;
 
 fa::Engine::Engine(GLFWwindow * window) : m_Window(window)
 {
-	Init();
+	
 }
 
 fa::Engine * fa::Engine::GetInstance()
@@ -40,6 +40,8 @@ void fa::Engine::Start()
 {
 	char title[256];
 	auto prevTime = std::chrono::high_resolution_clock::now();
+
+	Init();
 
 	while (!glfwWindowShouldClose(m_Window))
 	{

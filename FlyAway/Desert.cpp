@@ -26,5 +26,6 @@ fa::SceneObject * fa::Desert::GenerateSceneObject(Terrain * terrain, BoundingBox
 	Engine * engine = Engine::GetInstance();
 	Model * model = engine->GetModel(Models::RedCube);
 	auto position = bounds.Center();
-	return new SceneObject(model, position + Vector3f(0, terrain->GetHeightAt(position), 0));
+	//return new SceneObject(model, position + Vector3f(0, terrain->GetHeightAt(position), 0));
+	return nullptr;
 }

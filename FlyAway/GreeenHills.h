@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Biome.h"
+#include "Model.h"
 
 namespace fa
 {
@@ -17,5 +18,6 @@ namespace fa
 	private:
 		Perlin * m_Perlin;
 		Perlin * m_ColorPerlin;
+		std::shared_ptr<ModelRandomGenerator> m_ModelGenerator;
 	};
 }

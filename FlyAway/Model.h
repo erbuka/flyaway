@@ -10,4 +10,6 @@ namespace fa
 		virtual void Render() = 0;
 		virtual BoundingBox3f GetBounds() = 0;
 	};
+
+	using ModelRandomGenerator = RandomTreeNode<Model*>;
 }

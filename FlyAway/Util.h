@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <memory>
 #include "GL/glew.h"
 
 #define glFastFail(f) { f; Util::NotZeroFail(glGetError()); }
@@ -43,42 +44,53 @@ namespace fa
 		std::vector<std::pair<float, T>> m_Values;
 	};
 
-	/*
+
 	template<typename T>
 	class RandomTreeNode
 	{
 	public:
 		using Inputs = std::map<std::string, float>;
-		using ProbabilityMap = std::map<float, RandomTreeNode>;
-		RandomTreeNode(T value): m_Leaf(true), m_Value(value) { }
-		RandomTreeNode(std::string inputName, ProbabilityMap map) : m_Map(map), m_InputName(inputName), m_Leaf(false) {}
+		using Pointer = std::shared_ptr<RandomTreeNode<T>>;
 
-		T GetResult(Inputs&& inputs)
+		RandomTreeNode(std::initializer_list<T> values) : m_Leaf(true)
 		{
-			float input = inputs[m_InputName];
-			for (auto item = m_Map.rbegin(); item != m_Map.end(); item++)
+			for (auto& v : values)
 			{
-				if (input >= (*item).first)
-				{
-					if ((*item).second.m_Leaf)
-					{
-						return (*item).second.m_Value;
-					}
-					else
-					{
-						return (*item).second.GetResult(inputs);
-					}
-				}
+				m_Values.push_back(v);
 			}
+			std::cout << "Created" << std::endl;
+		}
+
+		RandomTreeNode(std::string inputName, Pointer left, Pointer right) :
+			m_InputName(inputName), m_Left(left), m_Right(right), m_Leaf(false)
+		{
+			std::cout << "Created" << std::endl;
+		}
+
+		~RandomTreeNode()
+		{
+			std::cout << "Deleted" << std::endl;
+		}
+
+		T GetResult(Inputs& inputs)
+		{
+			float input = inputs.at(m_InputName);
+			Pointer selectedNode = Random::NextValue<float>() < input ? m_Left : m_Right;
+			return selectedNode->m_Leaf ? selectedNode->GetValue() : selectedNode->GetResult(inputs);
 		}
 
 	private:
-		T m_Value;
+
+		T GetValue()
+		{
+			return Random::Next(m_Values);
+		}
+
+		std::vector<T> m_Values;
 		bool m_Leaf;
 		std::string m_InputName;
-		ProbabilityMap m_Map;
+		Pointer m_Left, m_Right;
 	};
-	*/
 
 	class Random
 	{
