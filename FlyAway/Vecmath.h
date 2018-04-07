@@ -5,6 +5,17 @@
 #include <cmath>
 #include "Util.h"
 namespace fa {
+
+	template<typename T>
+	union Vector4
+	{
+		T Components[4];
+		struct { T X, Y, Z, W; };
+		struct { T R, G, B, A; };
+		Vector4() : X(0), Y(0), Z(0), W(0) {}
+		Vector4(T x, T y , T z, T w) : X(x), Y(y), Z(z), W(w) {}
+	};
+
 	template<typename T>
 	union Vector3
 	{
@@ -186,6 +197,26 @@ namespace fa {
 			});
 		}
 
+		static Matrix4 Rotation(const Vector4<T>& quaternion)
+		{
+			return Rotation(quaternion.W, { quaternion.X, quaternion.Y, quaternion.Z });
+		}
+
+		static Matrix4 Rotation(T theta, const Vector3<T>& axis)
+		{
+			T ct = std::cos(theta);
+			T st = std::sin(theta);
+			
+			T x = axis.X, y = axis.Y, z = axis.Z;
+
+			return Matrix4(std::array<T, 16> {
+				ct + x * x * (1.0f - ct), x * y * (1.0f - ct) - z * st, x * z * (1.0f - ct) + y * st, 0.0f,
+				y * x * (1.0f - ct) + z * st, ct + y * y * (1.0f - ct), y * z * (1.0f - ct) - x * st, 0.0f,
+				z * x * (1.0f - ct) - y * st, z * y * (1.0f - ct) + x * st, ct + z * z * (1.0f - ct), 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+		}
+
 		static Matrix4 Translation(const Vector3<T>& t)
 		{
 			return Matrix4(std::array<T, 16> {
@@ -258,6 +289,8 @@ namespace fa {
 	using Vector2f = Vector2<float>;
 
 	using Vector3f = Vector3<float>;
+
+	using Vector4f = Vector4<float>;
 
 	using Matrix4f = Matrix4<float>;
 

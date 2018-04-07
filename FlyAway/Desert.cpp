@@ -45,7 +45,7 @@ fa::SceneObject * fa::Desert::GenerateSceneObject(Terrain * terrain, BoundingBox
 	float z = Random::NextFit(1.0f, bounds.Min.Z, bounds.Max.Z);
 
 	auto position = Vector3f(x, terrain->GetHeightAt({ x, 0, z}), z);
-
+	Vector4f rotation = { 0.0f, 1.0f, 0.0f, PI<float>() * 2.0f * Random::NextValue<float>() };
 
 	ModelRandomGenerator::Inputs inputs = {
 		{ "itemChance", 0.005f }
@@ -53,5 +53,5 @@ fa::SceneObject * fa::Desert::GenerateSceneObject(Terrain * terrain, BoundingBox
 
 	auto model = m_ModelGenerator->GetResult(inputs);
 
-	return model == nullptr ? nullptr : new SceneObject(model, position);
+	return model == nullptr ? nullptr : new SceneObject(model, position, rotation);
 }

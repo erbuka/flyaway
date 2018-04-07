@@ -153,9 +153,9 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
-//		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.6f ?
-//			std::shared_ptr<Biome>(new GreenHills()) : std::shared_ptr<Biome>(new Desert()));
-		m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
+		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.6f ?
+			std::shared_ptr<Biome>(new GreenHills()) : std::shared_ptr<Biome>(new Desert()));
+		//m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
 	}
 
 
@@ -166,7 +166,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		BoundingBox3f bounds = GetNextChunkBounds();
 		Terrain * terrain = new Terrain(m_Width, m_ChunkDepth, bounds);
 
-		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 0.01f);
+		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 10);
 		m_BiomeInterpolator->GenerateTerrain(terrain);
 
 		m_Terrain.push_back(terrain);

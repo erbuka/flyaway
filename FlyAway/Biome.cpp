@@ -68,7 +68,7 @@ fa::BiomeInterpolator::BiomeInterpolator(Biome * currentBiome) :
 {
 }
 
-float fa::BiomeInterpolator::GetInterpolationValue() const
+int fa::BiomeInterpolator::GetInterpolationValue() const
 {
 	return m_InterpolationValue;
 }
@@ -81,8 +81,7 @@ fa::SceneObject * fa::BiomeInterpolator::GenerateSceneObject(Terrain * terrain, 
 	}
 	else
 	{
-
-		return Random::NextValue<float>() < m_InterpolationValue ?
+		return Random::NextValue<float>() < m_InterpolationValue / (double)MaxInterpolationSteps ?
 			m_NextBiome->GenerateSceneObject(terrain, bounds) :
 			m_CurrentBiome->GenerateSceneObject(terrain, bounds);
 	}
@@ -104,8 +103,8 @@ fa::BiomeTerrainDescriptor fa::BiomeInterpolator::DescribeTerrainAtXY(float x, f
 		// So t should be in [0, 1)
 		double t = (z - m_StartZ) / (m_EndZ - m_StartZ); 
 
-		double tFrom = m_InterpolationValue;
-		double tTo = std::min(1.0, m_InterpolationValue + m_InterpolationStep);
+		double tFrom = m_InterpolationValue / (double)MaxInterpolationSteps;
+		double tTo = std::min(1.0, (m_InterpolationValue + m_InterpolationStep) / (double)MaxInterpolationSteps );
 
 		auto currentDescr = m_CurrentBiome->DescribeTerrainAtXY(x, z);
 		auto nextDescr = m_NextBiome->DescribeTerrainAtXY(x, z);
@@ -136,10 +135,10 @@ std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetNextBiome() const
 void fa::BiomeInterpolator::PushBiome(std::shared_ptr<Biome> nextBiome)
 {
 	m_NextBiome = nextBiome;
-	m_InterpolationValue = 0.0f;
+	m_InterpolationValue = 0;
 }
 
-void fa::BiomeInterpolator::StartInterpolation(float startZ, float endZ, float step)
+void fa::BiomeInterpolator::StartInterpolation(float startZ, float endZ, int step)
 {
 	m_InterpolationStep = step;
 	m_StartZ = startZ;
@@ -148,9 +147,9 @@ void fa::BiomeInterpolator::StartInterpolation(float startZ, float endZ, float s
 
 void fa::BiomeInterpolator::EndInterpolation()
 {
-	m_InterpolationValue = std::min(1.0, m_InterpolationValue + m_InterpolationStep);
+	m_InterpolationValue = std::min(MaxInterpolationSteps, m_InterpolationValue + m_InterpolationStep);
 
-	if (m_InterpolationValue == 1.0 && !IsStable())
+	if (m_InterpolationValue == MaxInterpolationSteps && !IsStable())
 	{
 		m_CurrentBiome = m_NextBiome;
 		PushBiome(nullptr);

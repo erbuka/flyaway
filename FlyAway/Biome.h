@@ -35,19 +35,22 @@ namespace fa
 
 		void PushBiome(std::shared_ptr<Biome> nextBiome);
 
-		void StartInterpolation(float startZ, float endZ, float step);
+		void StartInterpolation(float startZ, float endZ, int step);
 
 		void EndInterpolation();
 
-		float GetInterpolationValue() const;
+		int GetInterpolationValue() const;
 
 
 		virtual SceneObject* GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds) override;
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 
 	private:
+
+		static constexpr int MaxInterpolationSteps = 1000;
+
 		std::shared_ptr<Biome> m_CurrentBiome, m_NextBiome;
-		double m_InterpolationValue, m_InterpolationStep;
+		int m_InterpolationValue, m_InterpolationStep;
 		double m_StartZ, m_EndZ;
 	};
 }

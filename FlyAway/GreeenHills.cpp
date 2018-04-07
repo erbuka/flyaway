@@ -59,7 +59,11 @@ fa::SceneObject * fa::GreenHills::GenerateSceneObject(Terrain * terrain, Boundin
 
 	auto model = m_ModelGenerator->GetResult(inputs);
 
-	return model == nullptr ? nullptr : new SceneObject(model, { x, height, z }, { scale, scale, scale });
+	Vector3f position = { x, height, z };
+	Vector4f rotation = { 0.0f, 1.0f, 0.0f, PI<float>() * 2.0f * Random::NextValue<float>() };
+
+	return model == nullptr ? 
+		nullptr : new SceneObject(model, position, rotation, { scale, scale, scale });
 }
 
 fa::BiomeTerrainDescriptor fa::GreenHills::DescribeTerrainAtXY(float x, float z)

@@ -107,7 +107,8 @@ void fa::Engine::Init()
 	m_Sky = std::unique_ptr<Sky>(new Sky(24.0f));
 
 	// Init GL Parameters
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 }
 
