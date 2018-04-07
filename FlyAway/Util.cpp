@@ -64,6 +64,10 @@ GLuint fa::Util::CreateProgram(std::string vertexSource, std::string fragmentSou
 	glFastFail(glAttachShader(program, fragmentShader));
 
 	glFastFail(glLinkProgram(program));
+	
+	GLint linkStatus;
+	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+	NotZeroFail(linkStatus == GL_FALSE);
 
 	glFastFail(glValidateProgram(program));
 

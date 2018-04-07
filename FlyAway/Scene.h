@@ -18,7 +18,7 @@ namespace fa
 		~Scene();
 
 		void Update(float elapsedTime);
-		void Render();
+		void Render(GLuint program);
 
 	private:
 

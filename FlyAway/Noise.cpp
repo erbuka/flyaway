@@ -28,6 +28,7 @@ float fa::Noise::Normalize(float x)
 fa::Perlin::Perlin(float domainSize) :
 	Noise::Noise(domainSize)
 {
+
 	for (int i = 0; i < SeedSize; i++)
 	{
 		m_Seed[i] = i;
@@ -58,8 +59,8 @@ float fa::Perlin::SampleNormalized(const Vector3f & position)
 	for (unsigned int i = 0; i < m_Octaves; i++)
 	{
 		result += amplitude * SampleAtFrequency(rpos, frequency);
-		frequency = frequency >> 1;
 		amplitudeAcc += amplitude;
+		frequency = frequency >> 1;
 		amplitude *= m_Persistance;
 	}
 
@@ -82,8 +83,8 @@ float fa::Perlin::SampleNormalized(const Vector2f & position)
 	for (unsigned int i = 0; i < m_Octaves; i++)
 	{
 		result += amplitude * SampleAtFrequency(rpos, frequency);
-		frequency = frequency >> 1;
 		amplitudeAcc += amplitude;
+		frequency = frequency >> 1;
 		amplitude *= m_Persistance;
 	}
 

@@ -16,8 +16,7 @@ namespace fa
 		virtual SceneObject * GenerateSceneObject(Terrain* terrain, BoundingBox3f bounds) override;
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
-		Perlin * m_Perlin;
-		Perlin * m_ColorPerlin;
-		std::shared_ptr<ModelRandomGenerator> m_ModelGenerator;
+		std::unique_ptr<Perlin> m_TerrainHeight, m_ForestPerlin;
+		std::unique_ptr<ModelRandomGenerator> m_ModelGenerator;
 	};
 }

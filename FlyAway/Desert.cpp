@@ -1,21 +1,39 @@
 #include "Desert.h"
-#include "Noise.h"
 #include "Engine.h"
 #include "SceneObject.h"
 #include "Terrain.h"
 
+namespace _Desert
+{
+	fa::Interpolator<fa::Vector3f> SandColors = {
+		{ 0.0f, fa::Vector3f::GetColor(255, 232, 196) },
+		{ 1.0f, fa::Vector3f::GetColor(255, 221, 117) }
+	};
+}
 fa::Desert::Desert()
 {
-	m_Perlin = new Perlin(1024.0f);
-	m_Perlin->SetPersistance(0.25f);
+	m_TerrainHeight = std::unique_ptr<Perlin>(new Perlin(1024.0f));
+	m_TerrainHeight->SetPersistance(1.0f);
+
+	m_SandColor = std::unique_ptr<Perlin>(new Perlin(16.0f));
+	m_SandColor->SetPersistance(0.7f);
+
+	std::shared_ptr<ModelRandomGenerator> item(new ModelRandomGenerator{
+		Engine::GetInstance()->GetModel(Models::Cactus0PaleGreen),
+		Engine::GetInstance()->GetModel(Models::Rock0LightBrown)
+	});
+
+	std::shared_ptr<ModelRandomGenerator> nothing(new ModelRandomGenerator{ nullptr });
+
+	m_ModelGenerator = std::unique_ptr<ModelRandomGenerator>(new ModelRandomGenerator{ "itemChance", item, nothing });
 }
 
 fa::BiomeTerrainDescriptor fa::Desert::DescribeTerrainAtXY(float x, float z)
 {
 	BiomeTerrainDescriptor result;
 
-	result.TerrainHeight = m_Perlin->Sample({ x, z }) * 50.0f;
-	result.TerrainColor = { 0.8f, 0.7f, 0.1f };
+	result.TerrainHeight = m_TerrainHeight->Sample({ x, z }) * 20.0f;
+	result.TerrainColor = _Desert::SandColors.Sample(m_SandColor->Sample({ x, z }));
 
 	return result;
 }
@@ -23,9 +41,17 @@ fa::BiomeTerrainDescriptor fa::Desert::DescribeTerrainAtXY(float x, float z)
 
 fa::SceneObject * fa::Desert::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
 {
-	Engine * engine = Engine::GetInstance();
-	Model * model = engine->GetModel(Models::RedCube);
-	auto position = bounds.Center();
-	//return new SceneObject(model, position + Vector3f(0, terrain->GetHeightAt(position), 0));
-	return nullptr;
+	float x = Random::NextFit(1.0f, bounds.Min.X, bounds.Max.X);
+	float z = Random::NextFit(1.0f, bounds.Min.Z, bounds.Max.Z);
+
+	auto position = Vector3f(x, terrain->GetHeightAt({ x, 0, z}), z);
+
+
+	ModelRandomGenerator::Inputs inputs = {
+		{ "itemChance", 0.005f }
+	};
+
+	auto model = m_ModelGenerator->GetResult(inputs);
+
+	return model == nullptr ? nullptr : new SceneObject(model, position);
 }

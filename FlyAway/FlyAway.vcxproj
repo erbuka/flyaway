@@ -133,6 +133,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Biome.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Wavefront.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Biome.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Sky.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Vecmath.h" />

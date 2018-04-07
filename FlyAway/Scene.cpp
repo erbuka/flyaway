@@ -17,7 +17,7 @@ fa::Scene::Scene(Engine * engine, int width, int chunkDepth, float tileSize, flo
 {
 	m_WorldChunks = std::ceil(sightRange / (m_TileSize * m_ChunkDepth));
 	m_BiomeInterpolator = new BiomeInterpolator(new GreenHills());
-	m_BiomeInterpolator->PushBiome(new GreenHills());
+	m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
 }
 
 fa::Scene::~Scene()
@@ -49,21 +49,21 @@ void fa::Scene::Update(float elapsedTime)
 
 }
 
-void fa::Scene::Render()
+void fa::Scene::Render(GLuint program)
 {
+	float width = Engine::GetInstance()->GetWindowWidth(),
+		height = Engine::GetInstance()->GetWindowHeight();
 
 	m_Projection.LoadIdentity();
-	m_Projection.Perspective(3.141592 / 4, fa::CWidth / (float)fa::CHeight, 0.1, 1000);
+	m_Projection.Perspective(3.141592 / 4, width / height, 0.1, m_SightRange);
 	
 	m_ModelView.LoadIdentity();
 	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, -m_CameraPosition.Z);
 
-	auto basicProgram = m_Engine->GetProgram("basic");
+	GLint prLoc = glGetUniformLocation(program, "in_ProjectionMatrix");
+	GLint mvLoc = glGetUniformLocation(program, "in_ModelViewMatrix");
 
-	GLint prLoc = glGetUniformLocation(basicProgram, "in_ProjectionMatrix");
-	GLint mvLoc = glGetUniformLocation(basicProgram, "in_ModelViewMatrix");
-
-	glUseProgram(basicProgram);
+	glUseProgram(program);
 
 	for (auto terrain : m_Terrain)
 	{
@@ -76,7 +76,7 @@ void fa::Scene::Render()
 		glBindVertexArray(0);
 
 		auto& sceneObjGrid = terrain->GetSceneObjects();
-
+		
 		for (int x = 0; x < sceneObjGrid.GetCellsX(); x++)
 		{
 			for (int z = 0; z < sceneObjGrid.GetCellsZ(); z++)
@@ -153,7 +153,9 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
-		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() >= 0.0f ? (Biome*)new GreenHills() : (Biome*)new Desert());
+//		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.6f ?
+//			std::shared_ptr<Biome>(new GreenHills()) : std::shared_ptr<Biome>(new Desert()));
+		m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
 	}
 
 
@@ -174,6 +176,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		m_CameraWaypoints.push_back(bounds.Center() + Vector3f{0, 3 + biomeDescr.TerrainHeight, 0});
 
 		m_BiomeInterpolator->EndInterpolation();
+
 	}
 
 

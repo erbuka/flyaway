@@ -15,6 +15,13 @@ namespace fa
 	constexpr int CWidth = 1280;
 	constexpr int CHeight = 768;
 
+
+
+	template<typename T>
+	constexpr T PI() {
+		return T(3.1415926535897932385L);
+	}
+
 	template<typename T>
 	class Interpolator
 	{
@@ -58,18 +65,15 @@ namespace fa
 			{
 				m_Values.push_back(v);
 			}
-			std::cout << "Created" << std::endl;
 		}
 
 		RandomTreeNode(std::string inputName, Pointer left, Pointer right) :
 			m_InputName(inputName), m_Left(left), m_Right(right), m_Leaf(false)
 		{
-			std::cout << "Created" << std::endl;
 		}
 
 		~RandomTreeNode()
 		{
-			std::cout << "Deleted" << std::endl;
 		}
 
 		T GetResult(Inputs& inputs)
@@ -124,6 +128,7 @@ namespace fa
 	{
 	public:
 
+
 		template<typename T>
 		static inline T Clamp(T x, T a, T b)
 		{
@@ -131,21 +136,21 @@ namespace fa
 		}
 
 		template<typename T>
-		static void NotZeroFail(T result)
+		inline static void NotZeroFail(T result)
 		{
 			if (result)
 			{
-				std::cout << L"Fail at " << __FILEW__ << L": " << __LINE__ << std::endl;
+				std::cout << "Fail at " << __FILE__ << ":" << __LINE__ << " with result: " << result << std::endl;
 				std::cout << GetLog().str() << std::endl;
 			}
 		}
 
 		template<typename T>
-		static void ZeroFail(T result)
+		inline static void ZeroFail(T result)
 		{
 			if (!result)
 			{
-				std::cout << L"Fail at " << __FILEW__ << L": " << __LINE__ << std::endl;
+				std::cout << "Fail at " << __FILE__ << ":" << __LINE__ << " with result: " << result << std::endl;
 				std::cout << GetLog().str() << std::endl;
 			}
 		}

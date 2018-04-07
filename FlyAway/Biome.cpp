@@ -123,17 +123,17 @@ bool fa::BiomeInterpolator::IsStable() const
 	return m_NextBiome == nullptr;
 }
 
-fa::Biome * fa::BiomeInterpolator::GetCurrentBiome() const
+std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetCurrentBiome() const
 {
 	return m_CurrentBiome;
 }
 
-fa::Biome * fa::BiomeInterpolator::GetNextBiome() const
+std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetNextBiome() const
 {
 	return m_NextBiome;
 }
 
-void fa::BiomeInterpolator::PushBiome(Biome * nextBiome)
+void fa::BiomeInterpolator::PushBiome(std::shared_ptr<Biome> nextBiome)
 {
 	m_NextBiome = nextBiome;
 	m_InterpolationValue = 0.0f;
@@ -149,6 +149,7 @@ void fa::BiomeInterpolator::StartInterpolation(float startZ, float endZ, float s
 void fa::BiomeInterpolator::EndInterpolation()
 {
 	m_InterpolationValue = std::min(1.0, m_InterpolationValue + m_InterpolationStep);
+
 	if (m_InterpolationValue == 1.0 && !IsStable())
 	{
 		m_CurrentBiome = m_NextBiome;

@@ -30,10 +30,10 @@ namespace fa
 		
 		bool IsStable() const;
 
-		Biome * GetCurrentBiome() const;
-		Biome * GetNextBiome() const;
+		std::shared_ptr<Biome> GetCurrentBiome() const;
+		std::shared_ptr<Biome> GetNextBiome() const;
 
-		void PushBiome(Biome * nextBiome);
+		void PushBiome(std::shared_ptr<Biome> nextBiome);
 
 		void StartInterpolation(float startZ, float endZ, float step);
 
@@ -46,7 +46,7 @@ namespace fa
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 
 	private:
-		Biome * m_CurrentBiome, *m_NextBiome;
+		std::shared_ptr<Biome> m_CurrentBiome, m_NextBiome;
 		double m_InterpolationValue, m_InterpolationStep;
 		double m_StartZ, m_EndZ;
 	};
