@@ -101,14 +101,15 @@ void fa::Engine::Init()
 	CreateQuadVAO();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, 300.0f, 6.0f, 1.0f, 300.0f);
+	m_Scene = new Scene(this, 300.0f, 6.0f, 1.0f, SightRange);
 
 	// Initialize sky
-	m_Sky = std::unique_ptr<Sky>(new Sky(24.0f));
+	m_Sky = std::unique_ptr<Sky>(new Sky(240.0f));
 
 	// Init GL Parameters
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+	glClearColor(0, 0, 0, 0);
 
 }
 
@@ -174,8 +175,13 @@ void fa::Engine::Render()
 
 		// Render scene on top of the sky
 		{
+			auto program = GetProgram("deferred");
 			glEnable(GL_DEPTH_TEST);
-			m_Scene->Render(GetProgram("deferred"));
+			glFastFail(glUseProgram(program));
+			glUniform1f(glGetUniformLocation(program, "in_SightRange"), SightRange);
+			m_Scene->Render(program);
+			glUseProgram(0);
+
 		}
 	}
 
@@ -229,13 +235,19 @@ void fa::Engine::Render()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_EdgeFB->GetColorAttachment(0));
 
+		// Depth
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_DeferredFB->GetDepthAttachment());
+
 		glFastFail(glUseProgram(program));
 
 		glUniform1i(glGetUniformLocation(program, "in_Albedo"), 0);
 		glUniform1i(glGetUniformLocation(program, "in_Normal"), 1);
 		glUniform1i(glGetUniformLocation(program, "in_Edge"), 2);
+		glUniform1i(glGetUniformLocation(program, "in_Depth"), 3);
 		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
 		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
+		glUniform3fv(glGetUniformLocation(program, "in_FogColor"), 1, (float*)&topColor);
 
 		glFastFail(glBindVertexArray(m_ScreenQuad.VAO));
 		glFastFail(glDrawArrays(GL_TRIANGLES, 0, 6));

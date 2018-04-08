@@ -71,6 +71,8 @@ namespace fa
 	private:
 
 
+		static constexpr float SightRange = 300.0f;
+
 		Engine(GLFWwindow * window);
 
 		void Init();

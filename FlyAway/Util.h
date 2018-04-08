@@ -161,6 +161,13 @@ namespace fa
 			return (T)(a * (1.0 - t) + b * t);
 		}
 
+		template<typename T, typename K>
+		static inline T CosLerp(T a, T b, K t)
+		{
+			K t2 = (K)1 - (std::cos((K)2 * t * PI<K>()) + (K)1) / (K)2;
+			return Lerp(a, b, t2);
+		}
+
 
 		static std::string ReadFile(std::string fileName);
 		static GLuint CreateProgram(std::string vertexSource, std::string fragmentSource);

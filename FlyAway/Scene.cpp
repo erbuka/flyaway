@@ -56,14 +56,14 @@ void fa::Scene::Render(GLuint program)
 
 	m_Projection.LoadIdentity();
 	m_Projection.Perspective(3.141592 / 4, width / height, 0.1, m_SightRange);
-	
+	//m_Projection.Orthographic(-20, 20, 300, 0, -1000, 1000);
 	m_ModelView.LoadIdentity();
+	//m_ModelView.Rotate(PI<float>() * 0.5f, 1.0f, 0.0, 0.0f);
 	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, -m_CameraPosition.Z);
+	
 
 	GLint prLoc = glGetUniformLocation(program, "in_ProjectionMatrix");
 	GLint mvLoc = glGetUniformLocation(program, "in_ModelViewMatrix");
-
-	glUseProgram(program);
 
 	for (auto terrain : m_Terrain)
 	{
@@ -97,7 +97,6 @@ void fa::Scene::Render(GLuint program)
 		}
 	}
 
-	glUseProgram(0);
 }
 
 
