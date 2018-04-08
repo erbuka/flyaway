@@ -84,6 +84,7 @@ void fa::Engine::Init()
 {
 	// Initialize Shaders
 	LoadShader("basic", "shaders/basic.vert", "shaders/basic.frag");
+	LoadShader("sky", "shaders/sky.vert", "shaders/sky.frag");
 	LoadShader("deferred", "shaders/deferred.vert", "shaders/deferred.frag");
 	LoadShader("deferred_edge", "shaders/deferred_edge.vert", "shaders/deferred_edge.frag");
 	LoadShader("deferred_last", "shaders/deferred_last.vert", "shaders/deferred_last.frag");
@@ -95,16 +96,15 @@ void fa::Engine::Init()
 	// Initialize frame buffers
 	m_DeferredFB = std::unique_ptr<FrameBuffer>(new FrameBuffer(GetWindowWidth(), GetWindowHeight(), true, 2));
 	m_EdgeFB = std::unique_ptr<FrameBuffer>(new FrameBuffer(GetWindowWidth(), GetWindowHeight(), false, 1));
-	m_SkyFB = std::unique_ptr<FrameBuffer>(new FrameBuffer(GetWindowWidth(), GetWindowHeight(), false, 1));
 
 	// Initialize Quad for rendering to screen
 	CreateQuadVAO();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, 300.0f, 6.0f, 1.0f, SightRange);
+	m_Scene = new Scene(this, SightRange, 6.0f, 1.0f, SightRange);
 
 	// Initialize sky
-	m_Sky = std::unique_ptr<Sky>(new Sky(240.0f));
+	m_Sky = std::unique_ptr<Sky>(new Sky(24.0f));
 
 	// Init GL Parameters
 	glEnable(GL_CULL_FACE);
@@ -149,31 +149,10 @@ void fa::Engine::Render()
 		glFastFail(glBindFramebuffer(GL_FRAMEBUFFER, m_DeferredFB->GetFrameBuffer()));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Draw Sky
-		// Disable depth test so depth buffer won't get written (I hope)
-		{
-			glDisable(GL_DEPTH_TEST);
-
-			GLuint program = GetProgram("deferred_sky");
-
-			glFastFail(glUseProgram(program));
-
-
-			glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
-			glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
-			glUniform3fv(glGetUniformLocation(program, "in_ViewDirection"), 1, (float*)&viewDir);
-			glUniform3fv(glGetUniformLocation(program, "in_TopColor"), 1, (float*)&topColor);
-			glUniform3fv(glGetUniformLocation(program, "in_HorizonColor"), 1, (float*)&horizonColor);
-			glUniform2f(glGetUniformLocation(program, "in_Resolution"), GetWindowWidth(), GetWindowWidth());
-
-			glBindVertexArray(m_ScreenQuad.VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glBindVertexArray(0);
-
-			glUseProgram(0);
-		}
-
-		// Render scene on top of the sky
+		// The deffered shader will draw 2 textures:
+		// - 1 for the albedo (scene color)
+		// - 1 for the normals, in which we also store the normalized Z of the pixel,
+		//	 normalzed using the sight range as maximun value
 		{
 			auto program = GetProgram("deferred");
 			glEnable(GL_DEPTH_TEST);
@@ -186,6 +165,8 @@ void fa::Engine::Render()
 	}
 
 	// Deferred step 2: Generate edge detection mask
+	// This will generate an edge texture based on the normals
+	/*
 	{
 		GLuint program = GetProgram("deferred_edge");
 
@@ -196,13 +177,9 @@ void fa::Engine::Render()
 		glFastFail(glActiveTexture(GL_TEXTURE0));
 		glFastFail(glBindTexture(GL_TEXTURE_2D, m_DeferredFB->GetColorAttachment(1)));
 
-		glFastFail(glActiveTexture(GL_TEXTURE1));
-		glFastFail(glBindTexture(GL_TEXTURE_2D, m_DeferredFB->GetDepthAttachment()));
-
 		glFastFail(glUseProgram(program));
 
 		glUniform1i(glGetUniformLocation(program, "in_Texture"), 0);
-		glUniform1i(glGetUniformLocation(program, "in_Depth"), 1);
 		glUniform2f(glGetUniformLocation(program, "in_Resolution"), GetWindowWidth(), GetWindowHeight());
 
 		glBindVertexArray(m_ScreenQuad.VAO);
@@ -211,16 +188,45 @@ void fa::Engine::Render()
 
 		glUseProgram(0);
 	}
+	*/
 	
+	// From now we draw to the real frame buffer
+	// We need to disable depth testing here, since we are directly writing pixels to
+	// the screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glFastFail(glDisable(GL_DEPTH_TEST));
+	glFastFail(glClear(GL_COLOR_BUFFER_BIT));
 
-	// Deferred final step
+	// Draw Sky on the background
 	{
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glFastFail(glDisable(GL_DEPTH_TEST));
-		glFastFail(glClear(GL_COLOR_BUFFER_BIT));
+		GLuint program = GetProgram("sky");
 
+		glFastFail(glUseProgram(program));
+
+
+		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
+		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
+		glUniform3fv(glGetUniformLocation(program, "in_ViewDirection"), 1, (float*)&viewDir);
+		glUniform3fv(glGetUniformLocation(program, "in_TopColor"), 1, (float*)&topColor);
+		glUniform3fv(glGetUniformLocation(program, "in_HorizonColor"), 1, (float*)&horizonColor);
+		glUniform2f(glGetUniformLocation(program, "in_Resolution"), GetWindowWidth(), GetWindowWidth());
+
+		glBindVertexArray(m_ScreenQuad.VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		glUseProgram(0);
+	}
+
+	// Draw the deferred scene on top of the sky
+	// Use alpha blending to blend to horizon with the sky based on the scene distance
+	// which is stored in "W" component of the normal texture
+	{
 		GLuint program = GetProgram("deferred_last");
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 		// Albedo
@@ -247,7 +253,6 @@ void fa::Engine::Render()
 		glUniform1i(glGetUniformLocation(program, "in_Depth"), 3);
 		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
 		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
-		glUniform3fv(glGetUniformLocation(program, "in_FogColor"), 1, (float*)&topColor);
 
 		glFastFail(glBindVertexArray(m_ScreenQuad.VAO));
 		glFastFail(glDrawArrays(GL_TRIANGLES, 0, 6));
@@ -255,7 +260,11 @@ void fa::Engine::Render()
 
 		glUseProgram(0);
 
+		glDisable(GL_BLEND);
+
 	}
+
+
 }
 
 void fa::Engine::Resize()
@@ -306,6 +315,7 @@ void fa::Engine::LoadModels()
 	Wavefront cypress0 = Wavefront::Parse(Util::ReadFile("models/cypress0.obj"));
 	Wavefront rock0 = Wavefront::Parse(Util::ReadFile("models/rock0.obj"));
 	Wavefront cactus0 = Wavefront::Parse(Util::ReadFile("models/cactus0.obj"));
+	Wavefront oak0 = Wavefront::Parse(Util::ReadFile("models/oak0.obj"));
 
 	m_Models[Models::RedCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 0.0f, 0.0f) } });
 	m_Models[Models::WhiteCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 1.0f, 1.0f) } });
@@ -332,6 +342,14 @@ void fa::Engine::LoadModels()
 
 	m_Models[Models::Cactus0Green] = WavefrontModel::Create(cactus0, { { "cactus", Vector3f::GetColor(167, 219, 118) } });
 	m_Models[Models::Cactus0PaleGreen] = WavefrontModel::Create(cactus0, { { "cactus", Vector3f::GetColor(202, 231, 119)} });
+
+	m_Models[Models::Oak0PaleGreen] = WavefrontModel::Create(
+		oak0,
+		{
+			{ "log", Vector3f::GetColor(92, 43, 43) },
+			{ "leaves", Vector3f::GetColor(86, 122, 31) }
+		}
+	);
 }
 
 void fa::Engine::Dispose()

@@ -8,6 +8,7 @@ namespace fa
 
 	class Engine;
 	class BiomeInterpolator;
+	class Biome;
 	class Terrain;
 
 
@@ -21,6 +22,8 @@ namespace fa
 		void Render(GLuint program);
 
 	private:
+
+		std::shared_ptr<Biome> RandomBiome();
 
 		BoundingBox3f GetNextChunkBounds();
 

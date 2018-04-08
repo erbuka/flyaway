@@ -114,7 +114,7 @@ namespace fa
 		template<typename T>
 		static T NextValue(T min, T max)
 		{
-			return min + (NextValue<T>() * (max - min));
+			return (T)(min + NextValue<double>() * (max - min));
 		}
 
 		template<typename T>

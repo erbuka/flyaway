@@ -19,19 +19,20 @@ namespace _GreenHills
 fa::GreenHills::GreenHills()
 {
 	m_TerrainHeight = std::unique_ptr<Perlin>(new Perlin(300));
-	m_TerrainHeight->SetPersistance(0.3);
+	m_TerrainHeight->SetPersistance(0.4f);
 
 	m_ForestPerlin = std::unique_ptr<Perlin>(new Perlin(128));
 	m_ForestPerlin->SetPersistance(0.6f);
 	
-	std::shared_ptr<ModelRandomGenerator> cypress(new ModelRandomGenerator{
+	std::shared_ptr<ModelRandomGenerator> tree(new ModelRandomGenerator{
 		Engine::GetInstance()->GetModel(Models::Cypress0DarkGreen),
-		Engine::GetInstance()->GetModel(Models::Cypress0LightGreen)
+		Engine::GetInstance()->GetModel(Models::Cypress0LightGreen),
+		Engine::GetInstance()->GetModel(Models::Oak0PaleGreen)
 	});
 
 	std::shared_ptr<ModelRandomGenerator> nothing(new ModelRandomGenerator{ nullptr });
 
-	std::shared_ptr<ModelRandomGenerator> treeChance(new ModelRandomGenerator{ "tree", cypress, nothing });
+	std::shared_ptr<ModelRandomGenerator> treeChance(new ModelRandomGenerator{ "tree", tree, nothing });
 
 	m_ModelGenerator = std::unique_ptr<ModelRandomGenerator>(new ModelRandomGenerator{ "forest", treeChance, nothing });
 	
@@ -77,7 +78,7 @@ fa::BiomeTerrainDescriptor fa::GreenHills::DescribeTerrainAtXY(float x, float z)
 		{ "height", sample }
 	};
 	
-	result.TerrainHeight =  sample * 200;
+	result.TerrainHeight =  20.0f + sample * 80.0f;
 	result.TerrainColor = _GreenHills::TerrainColor.Sample(m_ForestPerlin->Sample({ x, z }));
 
 	return result;

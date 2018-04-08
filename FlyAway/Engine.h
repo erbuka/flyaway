@@ -25,6 +25,8 @@ namespace fa
 
 		constexpr char * Cactus0PaleGreen = "cactus0_pale_green";
 		constexpr char * Cactus0Green = "cactus0_green";
+
+		constexpr char * Oak0PaleGreen = "oak0_pale_green";
 	}
 
 	class Scene;
@@ -98,7 +100,7 @@ namespace fa
 			GLuint VAO, VB;
 		} m_ScreenQuad;
 
-		std::unique_ptr<FrameBuffer> m_DeferredFB, m_EdgeFB, m_SkyFB;
+		std::unique_ptr<FrameBuffer> m_DeferredFB, m_EdgeFB;
 
 		std::unique_ptr<Sky> m_Sky;
 

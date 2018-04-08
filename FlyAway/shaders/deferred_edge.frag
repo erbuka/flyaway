@@ -1,7 +1,6 @@
 #version 330
 
 uniform sampler2D in_Texture;
-uniform sampler2D in_Depth;
 uniform vec2 in_Resolution;
 
 const float vkernel[9] = float[9](

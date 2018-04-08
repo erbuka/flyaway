@@ -72,6 +72,9 @@
     <ClCompile Include="Sky.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SnowyMountains.cpp">
+      <Filter>Source Files\Biome</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util.h">
@@ -118,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="Sky.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SnowyMountains.h">
+      <Filter>Header Files\Biome</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

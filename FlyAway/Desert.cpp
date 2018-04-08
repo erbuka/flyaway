@@ -32,7 +32,7 @@ fa::BiomeTerrainDescriptor fa::Desert::DescribeTerrainAtXY(float x, float z)
 {
 	BiomeTerrainDescriptor result;
 
-	result.TerrainHeight = m_TerrainHeight->Sample({ x, z }) * 20.0f;
+	result.TerrainHeight = 20.0f + m_TerrainHeight->Sample({ x, z }) * 20.0f;
 	result.TerrainColor = _Desert::SandColors.Sample(m_SandColor->Sample({ x, z }));
 
 	return result;

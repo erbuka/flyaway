@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "GreeenHills.h"
 #include "Desert.h"
+#include "SnowyMountains.h"
 #include "Terrain.h"
 #include "SceneObject.h"
 #include "Model.h"
@@ -100,6 +101,17 @@ void fa::Scene::Render(GLuint program)
 }
 
 
+std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
+{
+	switch (Random::NextValue<int>(0, 3))
+	{
+	case 0: return std::shared_ptr<Biome>(new GreenHills());
+	case 1: return std::shared_ptr<Biome>(new Desert());
+	case 2: return std::shared_ptr<Biome>(new SnowyMountains());
+	default: return std::shared_ptr<Biome>(nullptr);
+	}
+}
+
 fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 {
 	static bool firstCall = true;
@@ -152,8 +164,7 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 	if (m_BiomeInterpolator->IsStable())
 	{
-		m_BiomeInterpolator->PushBiome(Random::NextValue<float>() > 0.6f ?
-			std::shared_ptr<Biome>(new GreenHills()) : std::shared_ptr<Biome>(new Desert()));
+		m_BiomeInterpolator->PushBiome(RandomBiome());
 		//m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
 	}
 
