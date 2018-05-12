@@ -23,6 +23,8 @@ namespace fa
 
 	private:
 
+		static constexpr float MaxCameraSpeed = 50.0f;
+
 		std::shared_ptr<Biome> RandomBiome();
 
 		BoundingBox3f GetNextChunkBounds();
@@ -37,7 +39,7 @@ namespace fa
 		int m_Width, m_ChunkDepth, m_WorldChunks;
 		float m_TileSize, m_SightRange;
 		Engine * m_Engine;
-		Vector3f m_CameraPosition;
+		Vector3f m_CameraPosition, m_CameraVelocity;
 		BiomeInterpolator * m_BiomeInterpolator;
 
 	};

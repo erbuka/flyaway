@@ -168,6 +168,15 @@ namespace fa
 			return Lerp(a, b, t2);
 		}
 
+		/*
+		template<typename T, typename K>
+		static inline Slerp(T a, T b, K t, K a)
+		{
+			K sa = std::sinf(a);
+			return (T)(std::sinf((1.0 - t) * a) / sa + std::sinf(t * a) / sa);
+		}
+		*/
+
 
 		static std::string ReadFile(std::string fileName);
 		static GLuint CreateProgram(std::string vertexSource, std::string fragmentSource);

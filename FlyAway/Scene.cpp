@@ -35,6 +35,7 @@ void fa::Scene::Update(float elapsedTime)
 {
 
 	// Update Camera Position
+	/*
 	if (m_CameraWaypoints.size() > 0)
 	{
 		bool hit;
@@ -44,9 +45,43 @@ void fa::Scene::Update(float elapsedTime)
 			m_CameraWaypoints.erase(m_CameraWaypoints.begin());
 		}
 	}
+	*/
 
 	// Update World
 	UpdateWorld(elapsedTime);
+
+	// Update camera
+	if (m_Terrain.size() > 0)
+	{
+		float maxSteepness = -std::numeric_limits<float>::max();
+		Vector3f target;
+		bool hit;
+
+		for (auto t = m_Terrain.begin() + 1; t != m_Terrain.end(); ++t)
+		{
+			Vector3f current = (*t)->GetBounds().Center();
+			current = current + Vector3f(0, (*t)->GetHeightAt(current), 0);
+
+			float steepness = (current - m_CameraPosition).Normalized() ^ Vector3f(0, 1, 0);
+
+			if (steepness > maxSteepness)
+			{
+				maxSteepness = steepness;
+				target = current;
+			}
+
+		}
+
+		Vector3f desiredVelocity = (target + Vector3f(0, 5, 0) - m_CameraPosition).Normalized() * MaxCameraSpeed;
+		Vector3f steering = (desiredVelocity - m_CameraVelocity);
+
+		//steering.Y = Util::Clamp(steering.Y, -MaxCameraSpeed / 4.0f, MaxCameraSpeed);
+
+		m_CameraVelocity = (m_CameraVelocity + steering * elapsedTime).Clamp(MaxCameraSpeed);
+
+		m_CameraPosition = m_CameraPosition + m_CameraVelocity * elapsedTime;
+
+	}
 
 }
 
@@ -103,6 +138,7 @@ void fa::Scene::Render(GLuint program)
 
 std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 {
+	//return std::shared_ptr<Biome>(new SnowyMountains());
 	switch (Random::NextValue<int>(0, 3))
 	{
 	case 0: return std::shared_ptr<Biome>(new GreenHills());
@@ -165,7 +201,6 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 	if (m_BiomeInterpolator->IsStable())
 	{
 		m_BiomeInterpolator->PushBiome(RandomBiome());
-		//m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
 	}
 
 

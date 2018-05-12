@@ -81,29 +81,30 @@ void fa::Sky::Update(float elapsedTime)
 	m_Time += elapsedTime;
 
 	// Everything is based on the day time and the total
-	int days;
-	float dayTime;
-	GetTime(days, dayTime);
+	Time time = GetTime();
+
 
 	// Compute light direction
-	float angle = std::sinf(2 * PI<float>() * dayTime);
+	float angle = std::sinf(2 * PI<float>() * time.dayTime);
 	//m_Light.Direction = Vector3f(0, std::sinf(angle), -std::cosf(angle));
 	m_Light.Direction = Vector3f(0.0, 1.0, 1.0).Normalized();
 
 	// Compute light color
-	m_Light.Color = _Sky::LightColor.Sample(dayTime);
+	m_Light.Color = _Sky::LightColor.Sample(time.dayTime);
 
 	// Compute colors
-	m_TopColor = _Sky::SkyColor.Sample(dayTime);
+	m_TopColor = _Sky::SkyColor.Sample(time.dayTime);
 	m_HorizonColor = m_TopColor + Vector3f(0.2f, 0.2f, 0.2f);
 
 }
 
-void fa::Sky::GetTime(int & days, float & dayTime) const
+fa::Sky::Time fa::Sky::GetTime()
 {
+	Time result;
 	float d = m_Time / m_DayDuration;
-	days = (int)d;
-	dayTime = (m_Time - days * m_DayDuration) / m_DayDuration;
+	result.days = (int)d;
+	result.dayTime = (m_Time - result.days * m_DayDuration) / m_DayDuration;
+	return result;
 }
 
 fa::Light fa::Sky::GetLight() const

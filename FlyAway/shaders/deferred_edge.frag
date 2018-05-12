@@ -12,7 +12,7 @@ const float vkernel[9] = float[9](
 const float hkernel[9] = float[9](
   1.0, 0.0, -1.0,
   2.0, 0.0, -2.0,
-  1.0, -0.0, -1.0
+  1.0, 0.0, -1.0
 );
 
 in vec2 fs_TexCoord;
@@ -37,7 +37,15 @@ void main()
      	result += hkernel[y * 3 + x] * texture2D(in_Texture, fs_TexCoord + s);
     }
 
+  /*
+  result = abs(result / 8.0);
+  float avg = 1.0 - max(result.x, max(result.y, result.z));
+  avg = avg > 0.2 ? (avg - 0.2) / 0.8 : 0.0;
+  */
+
   float avg = (1.0 - clamp(abs(result.r) + abs(result.g) + abs(result.b), 0.0, 1.0)) > 0.8 ? 1.0 : 0.0;
+
+
   
   gl_FragData[0] = vec4(avg, avg, avg, 1.0);
 }

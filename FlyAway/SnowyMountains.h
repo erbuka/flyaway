@@ -13,5 +13,6 @@ namespace fa
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 	private:
 		std::unique_ptr<Perlin> m_Height;
+		std::unique_ptr<Perlin> m_Snow;
 	};
 }

@@ -166,7 +166,7 @@ void fa::Engine::Render()
 
 	// Deferred step 2: Generate edge detection mask
 	// This will generate an edge texture based on the normals
-	/*
+	
 	{
 		GLuint program = GetProgram("deferred_edge");
 
@@ -188,7 +188,6 @@ void fa::Engine::Render()
 
 		glUseProgram(0);
 	}
-	*/
 	
 	// From now we draw to the real frame buffer
 	// We need to disable depth testing here, since we are directly writing pixels to

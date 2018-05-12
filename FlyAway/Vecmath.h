@@ -4,6 +4,7 @@
 #include <ostream>
 #include <cmath>
 #include "Util.h"
+
 namespace fa {
 
 	template<typename T>
@@ -25,6 +26,18 @@ namespace fa {
 
 		Vector3() : X(0), Y(0), Z(0) {}
 		Vector3(T x, T y, T z) : X(x), Y(y), Z(z) {}
+
+		Vector3 Clamp(T maxLength)
+		{
+			if (Length() > maxLength)
+			{
+				return Normalized() * maxLength;
+			}
+			else
+			{
+				return *this;
+			}
+		}
 
 		Vector3 Floor()
 		{
@@ -132,6 +145,17 @@ namespace fa {
 		struct { T U, V; };
 		Vector2() : X(0), Y(0) {}
 		Vector2(T x, T y) : X(x), Y(y) {}
+
+		Vector2 Normalized()
+		{
+			T length = Length();
+			return length > 0 ? Vector3() : *this / length;
+		}
+
+		T Length()
+		{
+			return std::sqrt(X*X + Y*Y);
+		}
 		
 		Vector2 Floor() {
 			return Vector2((int)X, (int)Y);
@@ -160,6 +184,12 @@ namespace fa {
 	Vector2<T> operator/(const Vector2<T>& lhs, K rhs)
 	{
 		return{ lhs.X / rhs, lhs.Y / rhs };
+	}
+
+	template<typename T>
+	T operator^(const Vector2<T>& lhs, const Vector2<T>& rhs)
+	{
+		return lhs.X * rhs.X + lhs.Y * rhs.Y;
 	}
 
 	template<typename T>

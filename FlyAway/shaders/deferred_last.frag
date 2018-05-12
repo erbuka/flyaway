@@ -25,8 +25,8 @@ void main()
 	float fogFactor = CalculateFogFactor(sample.w);
 	float diffuseFactor = max(0.0, dot(normal, in_LightDirection));	
 
-	//vec3 color = albedo.xyz * texture2D(in_Edge, fs_TexCoord).xyz * in_LightColor.xyz * diffuseFactor;
-	vec3 color = albedo.xyz * in_LightColor.xyz * diffuseFactor;
+	vec3 color = albedo.xyz * texture2D(in_Edge, fs_TexCoord).xyz * in_LightColor.xyz * diffuseFactor;
+	//vec3 color = albedo.xyz * in_LightColor.xyz * diffuseFactor;
 	
 	gl_FragColor = vec4(color, (1.0 - fogFactor) * albedo.a);
 }
