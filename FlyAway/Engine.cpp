@@ -315,6 +315,7 @@ void fa::Engine::LoadModels()
 	Wavefront rock0 = Wavefront::Parse(Util::ReadFile("models/rock0.obj"));
 	Wavefront cactus0 = Wavefront::Parse(Util::ReadFile("models/cactus0.obj"));
 	Wavefront oak0 = Wavefront::Parse(Util::ReadFile("models/oak0.obj"));
+	Wavefront xmastree0 = Wavefront::Parse(Util::ReadFile("models/xmastree0.obj"));
 
 	m_Models[Models::RedCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 0.0f, 0.0f) } });
 	m_Models[Models::WhiteCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 1.0f, 1.0f) } });
@@ -347,6 +348,14 @@ void fa::Engine::LoadModels()
 		{
 			{ "log", Vector3f::GetColor(92, 43, 43) },
 			{ "leaves", Vector3f::GetColor(86, 122, 31) }
+		}
+	);
+
+	m_Models[Models::XmasTree0DarkGreen] = WavefrontModel::Create(
+		xmastree0,
+		{
+			{ "log", Vector3f::GetColor(34, 19, 19) },
+			{ "leaves", Vector3f::GetColor(59, 92, 10) }
 		}
 	);
 }

@@ -122,7 +122,7 @@ fa::Vertexf & fa::Terrain::GetAdjacency(EAdjacency adjacency, int index)
 void fa::Terrain::GenerateVertexArray()
 {
 
-	ComputeNormals();
+	//ComputeNormals();
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);

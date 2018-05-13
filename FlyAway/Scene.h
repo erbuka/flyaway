@@ -33,7 +33,6 @@ namespace fa
 		void UpdateWorld(float elapsedTime);
 
 		std::vector<Terrain*> m_Terrain;
-		std::vector<Vector3f> m_CameraWaypoints;
 
 		MatrixStack4f m_Projection, m_ModelView;
 		int m_Width, m_ChunkDepth, m_WorldChunks;

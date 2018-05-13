@@ -27,6 +27,8 @@ namespace fa
 		constexpr char * Cactus0Green = "cactus0_green";
 
 		constexpr char * Oak0PaleGreen = "oak0_pale_green";
+
+		constexpr char * XmasTree0DarkGreen = "xmastree0_dark_green";
 	}
 
 	class Scene;

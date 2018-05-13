@@ -75,8 +75,6 @@ void fa::Scene::Update(float elapsedTime)
 		Vector3f desiredVelocity = (target + Vector3f(0, 5, 0) - m_CameraPosition).Normalized() * MaxCameraSpeed;
 		Vector3f steering = (desiredVelocity - m_CameraVelocity);
 
-		//steering.Y = Util::Clamp(steering.Y, -MaxCameraSpeed / 4.0f, MaxCameraSpeed);
-
 		m_CameraVelocity = (m_CameraVelocity + steering * elapsedTime).Clamp(MaxCameraSpeed);
 
 		m_CameraPosition = m_CameraPosition + m_CameraVelocity * elapsedTime;
@@ -138,7 +136,6 @@ void fa::Scene::Render(GLuint program)
 
 std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 {
-	//return std::shared_ptr<Biome>(new SnowyMountains());
 	switch (Random::NextValue<int>(0, 3))
 	{
 	case 0: return std::shared_ptr<Biome>(new GreenHills());
@@ -215,10 +212,6 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		m_BiomeInterpolator->GenerateTerrain(terrain);
 
 		m_Terrain.push_back(terrain);
-
-		// Insert camera waypoint
-		auto biomeDescr = m_BiomeInterpolator->DescribeTerrainAt(bounds.Center());
-		m_CameraWaypoints.push_back(bounds.Center() + Vector3f{0, 3 + biomeDescr.TerrainHeight, 0});
 
 		m_BiomeInterpolator->EndInterpolation();
 

@@ -29,4 +29,5 @@ void main()
 	//vec3 color = albedo.xyz * in_LightColor.xyz * diffuseFactor;
 	
 	gl_FragColor = vec4(color, (1.0 - fogFactor) * albedo.a);
+	//gl_FragColor = vec4(sample.xyz, 1.0);
 }
