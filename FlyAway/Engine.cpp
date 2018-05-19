@@ -309,12 +309,12 @@ void fa::Engine::WindowSizeCallback(GLFWwindow * window, int width, int height)
 
 void fa::Engine::LoadModels()
 {
-	Wavefront cube = Wavefront::Parse(Util::ReadFile("models/cube.obj"));
-	Wavefront cypress0 = Wavefront::Parse(Util::ReadFile("models/cypress0.obj"));
-	Wavefront rock0 = Wavefront::Parse(Util::ReadFile("models/rock0.obj"));
-	Wavefront cactus0 = Wavefront::Parse(Util::ReadFile("models/cactus0.obj"));
-	Wavefront oak0 = Wavefront::Parse(Util::ReadFile("models/oak0.obj"));
-	Wavefront xmastree0 = Wavefront::Parse(Util::ReadFile("models/xmastree0.obj"));
+	Wavefront cube = Wavefront::Parse(Util::ReadFile("models/cube.obj_"));
+	Wavefront cypress0 = Wavefront::Parse(Util::ReadFile("models/cypress0.obj_"));
+	Wavefront rock0 = Wavefront::Parse(Util::ReadFile("models/rock0.obj_"));
+	Wavefront cactus0 = Wavefront::Parse(Util::ReadFile("models/cactus0.obj_"));
+	Wavefront oak0 = Wavefront::Parse(Util::ReadFile("models/oak0.obj_"));
+	Wavefront xmastree0 = Wavefront::Parse(Util::ReadFile("models/xmastree0.obj_"));
 
 	m_Models[Models::RedCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 0.0f, 0.0f) } });
 	m_Models[Models::WhiteCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 1.0f, 1.0f) } });
