@@ -26,7 +26,12 @@ namespace fa {
 
 		Vector3() : X(0), Y(0), Z(0) {}
 		Vector3(T x, T y, T z) : X(x), Y(y), Z(z) {}
-
+		Vector3(int color)
+		{
+			R = ((color >> 16) & 0xff) / 255.0;
+			G = ((color >> 8) & 0xff) / 255.0;
+			B = (color & 0xff) / 255.0;
+		}
 		Vector3 Clamp(T maxLength)
 		{
 			if (Length() > maxLength)

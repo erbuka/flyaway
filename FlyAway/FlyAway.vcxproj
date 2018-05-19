@@ -130,6 +130,7 @@
     <ClCompile Include="GreeenHills.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Noise.cpp" />
+    <ClCompile Include="SaltySea.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Biome.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="MatrixStack.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Noise.h" />
+    <ClInclude Include="SaltySea.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Biome.h" />
     <ClInclude Include="SceneObject.h" />

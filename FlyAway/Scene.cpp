@@ -3,6 +3,7 @@
 #include "GreeenHills.h"
 #include "Desert.h"
 #include "SnowyMountains.h"
+#include "SaltySea.h"
 #include "Terrain.h"
 #include "SceneObject.h"
 #include "Model.h"
@@ -141,6 +142,7 @@ void fa::Scene::Render(GLuint program)
 
 std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 {
+	return std::shared_ptr<Biome>(new SaltySea());
 	switch (Random::NextValue<int>(0, 3))
 	{
 		case 0: return std::shared_ptr<Biome>(new GreenHills());
