@@ -17,8 +17,13 @@ fa::Scene::Scene(Engine * engine, int width, int chunkDepth, float tileSize, flo
 	m_SightRange(sightRange)
 {
 	m_WorldChunks = std::ceil(sightRange / (m_TileSize * m_ChunkDepth));
-	m_BiomeInterpolator = new BiomeInterpolator(new GreenHills());
-	m_BiomeInterpolator->PushBiome(std::shared_ptr<Biome>(new GreenHills()));
+	m_BiomeInterpolator = new BiomeInterpolator();
+
+	m_CurrentWorldChunk = {
+		Vector3f(-m_Width / 2 * m_TileSize, 0, -m_ChunkDepth * m_TileSize),
+		Vector3f(m_Width / 2 * m_TileSize, 0, 0)
+	};
+
 }
 
 fa::Scene::~Scene()
@@ -85,6 +90,7 @@ void fa::Scene::Update(float elapsedTime)
 
 void fa::Scene::Render(GLuint program)
 {
+
 	float width = Engine::GetInstance()->GetWindowWidth(),
 		height = Engine::GetInstance()->GetWindowHeight();
 
@@ -92,7 +98,7 @@ void fa::Scene::Render(GLuint program)
 	m_Projection.Perspective(3.141592 / 4, width / height, 0.1, m_SightRange);
 	//m_Projection.Orthographic(-20, 20, 300, 0, -1000, 1000);
 	m_ModelView.LoadIdentity();
-	//m_ModelView.Rotate(PI<float>() * 0.5f, 1.0f, 0.0, 0.0f);
+	m_ModelView.Multiply(Matrix4f::LookRotation(m_CameraVelocity.Normalized()));
 	m_ModelView.Translate(-m_CameraPosition.X, -m_CameraPosition.Y, -m_CameraPosition.Z);
 	
 
@@ -130,7 +136,6 @@ void fa::Scene::Render(GLuint program)
 			}
 		}
 	}
-
 }
 
 
@@ -138,15 +143,16 @@ std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 {
 	switch (Random::NextValue<int>(0, 3))
 	{
-	case 0: return std::shared_ptr<Biome>(new GreenHills());
-	case 1: return std::shared_ptr<Biome>(new Desert());
-	case 2: return std::shared_ptr<Biome>(new SnowyMountains());
-	default: return std::shared_ptr<Biome>(nullptr);
+		case 0: return std::shared_ptr<Biome>(new GreenHills());
+		case 1: return std::shared_ptr<Biome>(new Desert());
+		case 2: return std::shared_ptr<Biome>(new SnowyMountains());
+		default: return std::shared_ptr<Biome>(nullptr);
 	}
 }
 
 fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 {
+	/*
 	static bool firstCall = true;
 	static BoundingBox3f current;
 
@@ -163,8 +169,13 @@ fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 		current.Min = current.Min + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
 		current.Max = current.Max + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
 	}
+	*/
 
-	return current;
+	m_CurrentWorldChunk.Min = m_CurrentWorldChunk.Min + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
+	m_CurrentWorldChunk.Max = m_CurrentWorldChunk.Max + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
+
+
+	return m_CurrentWorldChunk;
 }
 
 void fa::Scene::UpdateBiome(float elapsedTime)
@@ -194,12 +205,10 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 
 	// GenerateTerrain new Biomes (TEMP)
-
-	if (m_BiomeInterpolator->IsStable())
+	while (m_BiomeInterpolator->GetTransitionsCount() < 5)
 	{
-		m_BiomeInterpolator->PushBiome(RandomBiome());
+		m_BiomeInterpolator->PushTransition(RandomBiome(), Random::NextValue(-200, -300), Random::NextValue(-300, -600));
 	}
-
 
 	// GenerateTerrain new world chunks
 	while (m_Terrain.size() < m_WorldChunks)
@@ -208,15 +217,11 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 		BoundingBox3f bounds = GetNextChunkBounds();
 		Terrain * terrain = new Terrain(m_Width, m_ChunkDepth, bounds);
 
-		m_BiomeInterpolator->StartInterpolation(bounds.Max.Z, bounds.Min.Z, 10);
 		m_BiomeInterpolator->GenerateTerrain(terrain);
 
 		m_Terrain.push_back(terrain);
-
-		m_BiomeInterpolator->EndInterpolation();
-
 	}
 
-
+	m_BiomeInterpolator->Cleanup(m_CurrentWorldChunk.Min.Z);
 
 }

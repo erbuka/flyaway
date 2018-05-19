@@ -232,6 +232,18 @@ namespace fa {
 			return Rotation(quaternion.W, { quaternion.X, quaternion.Y, quaternion.Z });
 		}
 
+		static Matrix4 LookRotation(const Vector3<T>& forward)
+		{
+			Vector3<T> right = Cross(forward, Vector3<T>{0, 1, 0});
+			Vector3<T> up = Cross(right, forward);
+			return Matrix4(std::array<T, 16>{
+				right.X, right.Y, right.Z, 0,
+				up.X, up.Y, up.Z, 0,
+				-forward.X, -forward.Y, -forward.Z, 0,
+				0,0,0,1
+			});
+		}
+
 		static Matrix4 Rotation(T theta, const Vector3<T>& axis)
 		{
 			T ct = std::cos(theta);

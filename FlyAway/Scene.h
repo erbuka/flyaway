@@ -40,6 +40,7 @@ namespace fa
 		Engine * m_Engine;
 		Vector3f m_CameraPosition, m_CameraVelocity;
 		BiomeInterpolator * m_BiomeInterpolator;
+		BoundingBox3f m_CurrentWorldChunk;
 
 	};
 }

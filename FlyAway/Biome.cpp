@@ -1,6 +1,7 @@
 #include "Biome.h"
 #include "Util.h"
 #include "Terrain.h"
+#include "GreeenHills.h"
 #include <cassert>
 
 void fa::Biome::GenerateTerrain(Terrain * terrain)
@@ -52,6 +53,7 @@ void fa::Biome::GenerateTerrain(Terrain * terrain)
 	}
 	*/
 	
+	
 	terrain->ComputeNormals();
 
 	terrain->GenerateVertexArray();
@@ -79,98 +81,125 @@ fa::BiomeTerrainDescriptor fa::Biome::DescribeTerrainAt(const Vector3f& position
 	return DescribeTerrainAtXY(position.X, position.Z);
 }
 
-fa::BiomeInterpolator::BiomeInterpolator(Biome * currentBiome) :
-	m_CurrentBiome(currentBiome),
-	m_NextBiome(nullptr),
-	m_InterpolationValue(0.0f),
-	m_InterpolationStep(0.0f)
+fa::BiomeInterpolator::BiomeInterpolator() :
+	m_DefaultBiome(std::shared_ptr<Biome>(new GreenHills()))
 {
-}
-
-int fa::BiomeInterpolator::GetInterpolationValue() const
-{
-	return m_InterpolationValue;
 }
 
 fa::SceneObject * fa::BiomeInterpolator::GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds)
 {
-	if (IsStable())
+
+	float z = bounds.Center().Z;
+	std::shared_ptr<Transition> transition = GetCurrentTransition(z);
+
+	if (transition == nullptr)
 	{
-		return m_CurrentBiome->GenerateSceneObject(terrain, bounds);
+		return GetCurrentBiome(z)->GenerateSceneObject(terrain, bounds);
 	}
 	else
 	{
-		return Random::NextValue<float>() < m_InterpolationValue / (double)MaxInterpolationSteps ?
-			m_NextBiome->GenerateSceneObject(terrain, bounds) :
-			m_CurrentBiome->GenerateSceneObject(terrain, bounds);
+		float t = -(z - transition->MaxZ) / (transition->MaxZ - transition->MinZ);
+		return Random::NextValue<float>() < t ?
+			transition->NextBiome->GenerateSceneObject(terrain, bounds) :
+			GetCurrentBiome(z)->GenerateSceneObject(terrain, bounds);
 	}
 }
 
 fa::BiomeTerrainDescriptor fa::BiomeInterpolator::DescribeTerrainAtXY(float x, float z)
 {
-	if (IsStable())
+
+	std::shared_ptr<Transition> transition = GetCurrentTransition(z);
+
+	if (transition == nullptr)
 	{
-		return m_CurrentBiome->DescribeTerrainAtXY(x, z);
+		return GetCurrentBiome(z)->DescribeTerrainAtXY(x, z);
 	}
 	else
 	{
+
 		BiomeTerrainDescriptor result;
 
-		// All z's are negative and:
-		// -> z <= m_StartZ
-		// -> m_EndZ <= m_StartZ
-		// So t should be in [0, 1)
-		double t = (z - m_StartZ) / (m_EndZ - m_StartZ); 
 
-		double tFrom = m_InterpolationValue / (double)MaxInterpolationSteps;
-		double tTo = std::min(1.0, (m_InterpolationValue + m_InterpolationStep) / (double)MaxInterpolationSteps );
+		double t = Fade(-(z - transition->MaxZ) / (transition->MaxZ - transition->MinZ));
 
-		auto currentDescr = m_CurrentBiome->DescribeTerrainAtXY(x, z);
-		auto nextDescr = m_NextBiome->DescribeTerrainAtXY(x, z);
+		auto currentDescr = GetCurrentBiome(z)->DescribeTerrainAtXY(x, z);
+		auto nextDescr = transition->NextBiome->DescribeTerrainAtXY(x, z);
 
-		result.TerrainHeight = Util::Lerp(currentDescr.TerrainHeight, nextDescr.TerrainHeight, Util::Lerp(tFrom, tTo, t));
-
-		result.TerrainColor = Util::Lerp(currentDescr.TerrainColor, nextDescr.TerrainColor, Util::Lerp(tFrom, tTo, t));
+		result.TerrainHeight = Util::Lerp(currentDescr.TerrainHeight, nextDescr.TerrainHeight, t);
+		result.TerrainColor = Util::Lerp(currentDescr.TerrainColor, nextDescr.TerrainColor, t);
 
 		return result;
+
 	}
+
 }
 
-bool fa::BiomeInterpolator::IsStable() const
+float fa::BiomeInterpolator::Fade(float t) const
 {
-	return m_NextBiome == nullptr;
+	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetCurrentBiome() const
+std::shared_ptr<fa::BiomeInterpolator::Transition> fa::BiomeInterpolator::GetCurrentTransition(float z)
 {
-	return m_CurrentBiome;
-}
-
-std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetNextBiome() const
-{
-	return m_NextBiome;
-}
-
-void fa::BiomeInterpolator::PushBiome(std::shared_ptr<Biome> nextBiome)
-{
-	m_NextBiome = nextBiome;
-	m_InterpolationValue = 0;
-}
-
-void fa::BiomeInterpolator::StartInterpolation(float startZ, float endZ, int step)
-{
-	m_InterpolationStep = step;
-	m_StartZ = startZ;
-	m_EndZ = endZ;
-}
-
-void fa::BiomeInterpolator::EndInterpolation()
-{
-	m_InterpolationValue = std::min(MaxInterpolationSteps, m_InterpolationValue + m_InterpolationStep);
-
-	if (m_InterpolationValue == MaxInterpolationSteps && !IsStable())
+	for (int i = 0; i < m_Transitions.size(); ++i)
 	{
-		m_CurrentBiome = m_NextBiome;
-		PushBiome(nullptr);
+		if (m_Transitions[i]->MaxZ >= z && m_Transitions[i]->MinZ <= z)
+		{
+			return m_Transitions[i];
+		}
 	}
+	return nullptr;
 }
+
+std::shared_ptr<fa::Biome> fa::BiomeInterpolator::GetCurrentBiome(float z) const
+{
+	for (int i = m_Transitions.size() - 1; i >= 0; --i)
+	{
+		if (m_Transitions[i]->MinZ >= z)
+		{
+			return m_Transitions[i]->NextBiome;
+		}
+	}
+	return m_DefaultBiome;
+}
+
+void fa::BiomeInterpolator::PushTransition(std::shared_ptr<Biome> biome, float length, float offsetZ)
+{
+	std::shared_ptr<Transition> last(m_Transitions.size() == 0 ? nullptr : m_Transitions[m_Transitions.size() - 1]);
+
+	std::shared_ptr<Transition> t(new Transition());
+
+	t->NextBiome = biome;
+	t->MaxZ = last == nullptr ? offsetZ : last->MinZ + offsetZ;
+	t->MinZ = t->MaxZ + length;
+
+	m_Transitions.push_back(t);
+}
+
+void fa::BiomeInterpolator::Cleanup(float z)
+{
+	int index = -1;
+	for (int i = m_Transitions.size() - 1; i >= 0; --i)
+	{
+		if (m_Transitions[i]->MinZ >= z)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	if (index != -1)
+	{
+		m_Transitions.erase(m_Transitions.begin(), m_Transitions.begin() + index);
+	}
+
+	std::cout << m_Transitions.size() << std::endl;
+
+}
+
+size_t fa::BiomeInterpolator::GetTransitionsCount()
+{
+	return m_Transitions.size();
+}
+
+

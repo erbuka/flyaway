@@ -26,31 +26,31 @@ namespace fa
 	class BiomeInterpolator : public Biome
 	{
 	public:
-		BiomeInterpolator(Biome * currentBiome);
-		
-		bool IsStable() const;
 
-		std::shared_ptr<Biome> GetCurrentBiome() const;
-		std::shared_ptr<Biome> GetNextBiome() const;
+		struct Transition
+		{
+			std::shared_ptr<Biome> NextBiome;
+			float MaxZ, MinZ;
+		};
 
-		void PushBiome(std::shared_ptr<Biome> nextBiome);
+		BiomeInterpolator();
 
-		void StartInterpolation(float startZ, float endZ, int step);
-
-		void EndInterpolation();
-
-		int GetInterpolationValue() const;
-
+		void PushTransition(std::shared_ptr<Biome>, float length, float offsetZ = 0);
+		void Cleanup(float z);
+		size_t GetTransitionsCount();
 
 		virtual SceneObject* GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds) override;
 		virtual BiomeTerrainDescriptor DescribeTerrainAtXY(float x, float z) override;
 
 	private:
 
-		static constexpr int MaxInterpolationSteps = 1000;
 
-		std::shared_ptr<Biome> m_CurrentBiome, m_NextBiome;
-		int m_InterpolationValue, m_InterpolationStep;
-		double m_StartZ, m_EndZ;
+		std::shared_ptr<Biome> GetCurrentBiome(float z) const;
+		std::shared_ptr<Transition> GetCurrentTransition(float z);
+		float Fade(float t) const;
+
+		std::vector<std::shared_ptr<Transition>> m_Transitions;
+
+		std::shared_ptr<Biome> m_DefaultBiome;
 	};
 }

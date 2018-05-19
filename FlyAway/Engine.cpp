@@ -135,7 +135,6 @@ fa::Model * fa::Engine::GetModel(std::string key)
 
 void fa::Engine::Render()
 {
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
 	auto light = m_Sky->GetLight();

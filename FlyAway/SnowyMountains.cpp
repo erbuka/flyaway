@@ -18,7 +18,7 @@ fa::SnowyMountains::SnowyMountains()
 	m_Height = std::unique_ptr<Perlin>(new Perlin(256.0f));
 	m_Snow = std::unique_ptr<Perlin>(new Perlin(256.0f));
 
-	m_Height->SetPersistance(0.25f);
+	m_Height->SetPersistance(0.5f);
 	m_Snow->SetPersistance(0.9f);
 
 	std::shared_ptr<ModelRandomGenerator> item(new ModelRandomGenerator{
@@ -36,7 +36,7 @@ fa::BiomeTerrainDescriptor fa::SnowyMountains::DescribeTerrainAtXY(float x, floa
 {
 	BiomeTerrainDescriptor result;
 	result.TerrainColor = _SnowyMountains::TerrainColor.Sample(m_Snow->Sample({ x, z }));
-	result.TerrainHeight = 40.0f + m_Height->Sample({ x, z }) * 300.0f;
+	result.TerrainHeight = 100.0f + m_Height->Sample({ x, z }) * 150.0f;
 	return result;
 }
 

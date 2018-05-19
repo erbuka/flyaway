@@ -128,7 +128,6 @@ namespace fa
 	{
 	public:
 
-
 		template<typename T>
 		static inline T Clamp(T x, T a, T b)
 		{
