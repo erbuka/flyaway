@@ -1,5 +1,6 @@
 #include "Terrain.h"
 #include "Util.h"
+#include "Water.h"
 
 fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds) :
 	m_VerticesX(divisionsX + 1),
@@ -7,7 +8,8 @@ fa::Terrain::Terrain(int divisionsX, int divisionsZ, const BoundingBox3f& bounds
 	m_Bounds(bounds),
 	m_VAO(0),
 	m_VB(0),
-	m_IB(0)
+	m_IB(0),
+	m_Water(nullptr)
 {
 	m_VerticesCount = m_VerticesX * m_VerticesZ;
 
@@ -119,11 +121,12 @@ fa::Vertexf & fa::Terrain::GetAdjacency(EAdjacency adjacency, int index)
 	return m_Adjacency[adjacency][index];
 }
 
-void fa::Terrain::GenerateVertexArray()
+void fa::Terrain::Generate()
 {
+	/* Compute terrain normals */
+	ComputeNormals();
 
-	//ComputeNormals();
-
+	/* Generate terrain VAO */
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
@@ -144,6 +147,9 @@ void fa::Terrain::GenerateVertexArray()
 
 	glBindVertexArray(0);
 
+	/* Generate Water VAO */
+	m_Water = std::shared_ptr<Water>(new Water());
+	m_Water->Generate(*this);
 }
 
 void fa::Terrain::ComputeNormals()
@@ -173,11 +179,21 @@ void fa::Terrain::ComputeNormals()
 	}
 }
 
-GLuint fa::Terrain::GetVAO()
+GLuint fa::Terrain::GetTerrainVAO() const
 {
 	return m_VAO;
 }
 
+std::shared_ptr<fa::Water> fa::Terrain::GetWater() const
+{
+	return m_Water;
+}
+
+
+fa::Vertexf & fa::Terrain::operator[](int index) const
+{
+	return m_Vertices[index];
+}
 
 fa::Vertexf & fa::Terrain::operator[](int index)
 {

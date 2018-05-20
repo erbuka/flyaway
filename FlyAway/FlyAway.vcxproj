@@ -138,6 +138,7 @@
     <ClCompile Include="SnowyMountains.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Water.cpp" />
     <ClCompile Include="Wavefront.cpp" />
     <ClCompile Include="WavefrontModel.cpp" />
   </ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Vecmath.h" />
+    <ClInclude Include="Water.h" />
     <ClInclude Include="Wavefront.h" />
     <ClInclude Include="WavefrontModel.h" />
   </ItemGroup>

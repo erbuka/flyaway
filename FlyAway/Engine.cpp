@@ -89,6 +89,7 @@ void fa::Engine::Init()
 	LoadShader("deferred_edge", "shaders/deferred_edge.vert", "shaders/deferred_edge.frag");
 	LoadShader("deferred_last", "shaders/deferred_last.vert", "shaders/deferred_last.frag");
 	LoadShader("deferred_sky", "shaders/deferred_sky.vert", "shaders/deferred_sky.frag");
+	LoadShader("water", "shaders/deferred_water.vert", "shaders/deferred_water.geom", "shaders/deferred_water.frag");
 
 	// Load models
 	LoadModels();
@@ -101,10 +102,10 @@ void fa::Engine::Init()
 	CreateQuadVAO();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, SightRange, 6.0f, 1.0f, SightRange);
+	m_Scene = new Scene(this, SightRange * 2, 6.0f, 1.0f, SightRange);
 
 	// Initialize sky
-	m_Sky = std::unique_ptr<Sky>(new Sky(24.0f));
+	m_Sky = std::unique_ptr<Sky>(new Sky(240.0f));
 
 	// Init GL Parameters
 	glEnable(GL_CULL_FACE);
@@ -143,7 +144,6 @@ void fa::Engine::Render()
 	Vector3f viewDir(0.0, 0.0, -1.0);
 
 	// Deferred step 1: Draw albedo and normals
-
 	{
 		glFastFail(glBindFramebuffer(GL_FRAMEBUFFER, m_DeferredFB->GetFrameBuffer()));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -161,6 +161,15 @@ void fa::Engine::Render()
 			glUseProgram(0);
 
 		}
+	}
+
+	/* Deferred step 1.a: Draw water after the terrain */
+	{
+		auto program = GetProgram("water");
+		glFastFail(glUseProgram(program));
+		glUniform1f(glGetUniformLocation(program, "in_SightRange"), SightRange);
+		m_Scene->RenderWater(program);
+		glUseProgram(0);
 	}
 
 	// Deferred step 2: Generate edge detection mask
@@ -315,6 +324,7 @@ void fa::Engine::LoadModels()
 	Wavefront cactus0 = Wavefront::Parse(Util::ReadFile("models/cactus0.obj_"));
 	Wavefront oak0 = Wavefront::Parse(Util::ReadFile("models/oak0.obj_"));
 	Wavefront xmastree0 = Wavefront::Parse(Util::ReadFile("models/xmastree0.obj_"));
+	Wavefront palmtree0 = Wavefront::Parse(Util::ReadFile("models/palmtree0.obj_"));
 
 	m_Models[Models::RedCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 0.0f, 0.0f) } });
 	m_Models[Models::WhiteCube] = WavefrontModel::Create(cube, { { "cube", Vector3f(1.0f, 1.0f, 1.0f) } });
@@ -357,6 +367,15 @@ void fa::Engine::LoadModels()
 			{ "leaves", Vector3f::GetColor(59, 92, 10) }
 		}
 	);
+
+	m_Models[Models::PalmTree0LightGreen] = WavefrontModel::Create(
+		palmtree0,
+		{
+			{ "log", 0x7C6650 },
+			{ "leaves", 0xA7DB76 },
+			{ "coconuts", 0x5C2B2B }
+		}
+	);
 }
 
 void fa::Engine::Dispose()
@@ -378,6 +397,14 @@ void fa::Engine::LoadShader(std::string key, std::string vsFile, std::string fsF
 	std::string vsSource = Util::ReadFile(vsFile);
 	std::string fsSource = Util::ReadFile(fsFile);
 	m_Programs.insert({ key, Util::CreateProgram(vsSource, fsSource) });
+}
+
+void fa::Engine::LoadShader(std::string key, std::string vsFile, std::string gsFile, std::string fsFile)
+{
+	std::string vsSource = Util::ReadFile(vsFile);
+	std::string gsSource = Util::ReadFile(gsFile);
+	std::string fsSource = Util::ReadFile(fsFile);
+	m_Programs.insert({ key, Util::CreateProgram(vsSource, gsSource, fsSource) });
 }
 
 fa::FrameBuffer::FrameBuffer(int width, int height, bool depthAttachment, int colorAttachments) :

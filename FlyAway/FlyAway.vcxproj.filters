@@ -78,6 +78,9 @@
     <ClCompile Include="SaltySea.cpp">
       <Filter>Source Files\Biome</Filter>
     </ClCompile>
+    <ClCompile Include="Water.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util.h">
@@ -130,6 +133,9 @@
     </ClInclude>
     <ClInclude Include="SaltySea.h">
       <Filter>Header Files\Biome</Filter>
+    </ClInclude>
+    <ClInclude Include="Water.h">
+      <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

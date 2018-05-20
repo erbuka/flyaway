@@ -45,7 +45,7 @@ namespace fa
 				}
 			}
 
-			return T();
+			return m_Values[m_Values.size() - 1].second;
 		}
 	private:
 		std::vector<std::pair<float, T>> m_Values;
@@ -179,6 +179,7 @@ namespace fa
 
 		static std::string ReadFile(std::string fileName);
 		static GLuint CreateProgram(std::string vertexSource, std::string fragmentSource);
+		static GLuint CreateProgram(std::string vertexSource, std::string geometrySource, std::string fragmentSource);
 
 		static std::stringstream& GetLog();
 

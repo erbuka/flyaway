@@ -38,25 +38,8 @@ void fa::Biome::GenerateTerrain(Terrain * terrain)
 
 	// Generate Normals
 	
-	/*
-	for (int i = 0; i < terrain->GetVerticesCount(); i++)
-	{
-		auto& vertex = (*terrain)[i];
-		auto position = vertex.Position;
-			
-		Vector3f down =	Vector3f(position.X, DescribeTerrainAt(vertex.Position + Vector3f(0, 0, 1)).TerrainHeight, position.Z + 1) - position;
-		Vector3f up = Vector3f(position.X, DescribeTerrainAt(vertex.Position + Vector3f(0, 0, -1)).TerrainHeight, position.Z - 1) - position;
-		Vector3f left =	Vector3f(position.X - 1, DescribeTerrainAt(vertex.Position + Vector3f(-1, 0, 0)).TerrainHeight, position.Z) - position;
-		Vector3f right = Vector3f(position.X + 1, DescribeTerrainAt(vertex.Position + Vector3f(1, 0, 0)).TerrainHeight, position.Z) - position;
 
-		vertex.Normal = (Cross(down, right) + Cross(right, up) + Cross(up, left) + Cross(left, down)).Normalized();
-	}
-	*/
-	
-	
-	terrain->ComputeNormals();
-
-	terrain->GenerateVertexArray();
+	terrain->Generate();
 
 	auto& sceneObjGrid = terrain->GetSceneObjects();
 
@@ -64,8 +47,12 @@ void fa::Biome::GenerateTerrain(Terrain * terrain)
 	{
 		for (int z = 0; z < sceneObjGrid.GetCellsZ(); z++)
 		{
+
 			auto& cell = sceneObjGrid.At(x, z);
-			cell.Object = GenerateSceneObject(terrain, cell.Bounds);
+			if (terrain->GetHeightAt(cell.Bounds.Center()) >= 0.0f)
+			{
+				cell.Object = GenerateSceneObject(terrain, cell.Bounds);
+			}
 		}
 	}
 
@@ -192,8 +179,6 @@ void fa::BiomeInterpolator::Cleanup(float z)
 	{
 		m_Transitions.erase(m_Transitions.begin(), m_Transitions.begin() + index);
 	}
-
-	std::cout << m_Transitions.size() << std::endl;
 
 }
 

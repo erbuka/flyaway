@@ -29,6 +29,8 @@ namespace fa
 		constexpr char * Oak0PaleGreen = "oak0_pale_green";
 
 		constexpr char * XmasTree0DarkGreen = "xmastree0_dark_green";
+
+		constexpr char * PalmTree0LightGreen = "palmtree0_light";
 	}
 
 	class Scene;
@@ -92,6 +94,7 @@ namespace fa
 		void LoadModels();
 
 		void LoadShader(std::string key, std::string vsFile, std::string fsFile);
+		void LoadShader(std::string key, std::string vsFile, std::string gsFile, std::string fsFile);
 
 		Scene * m_Scene;
 		std::map<std::string, GLuint> m_Programs;

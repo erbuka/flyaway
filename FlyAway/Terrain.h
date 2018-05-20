@@ -10,6 +10,7 @@ namespace fa
 	class SceneObject;
 	class SceneObjectGrid;
 	class Terrain;
+	class Water;
 	
 	class SceneObjectGrid
 	{
@@ -62,11 +63,12 @@ namespace fa
 		void SetAdjacenty(EAdjacency adjacency, int index, const Vertexf& vertex);
 		Vertexf& GetAdjacency(EAdjacency adjacency, int index);
 
-		void GenerateVertexArray();
-		void ComputeNormals();
+		void Generate();
 
-		GLuint GetVAO();
+		GLuint GetTerrainVAO() const;
+		std::shared_ptr<Water> GetWater() const;
 
+		Vertexf& operator[](int index) const;
 		Vertexf& operator[](int index);
 		Vertexf& At(int index);
 
@@ -77,6 +79,10 @@ namespace fa
 		BoundingBox3f& GetBounds();
 
 	private:
+
+		void ComputeNormals();
+
+
 		int m_VerticesCount, m_VerticesX, m_VerticesZ;
 		float m_TileWidth, m_TileDepth;
 		BoundingBox3f m_Bounds;
@@ -84,6 +90,7 @@ namespace fa
 		GLuint m_VB, m_IB, m_VAO;
 		std::vector<GLuint> m_Indices;
 		SceneObjectGrid m_SceneObjectGrid;
+		std::shared_ptr<Water> m_Water;
 	};
 
 	

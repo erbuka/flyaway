@@ -13,7 +13,7 @@ GLuint _CreateShader(std::string source, GLenum type)
 	GLint infoLogLength = 0;
 
 	src[0] = (GLchar*) source.c_str();
-	fa::Util::GetLog() << "Compiling...\n" << src[0] << "\n";
+	fa::Util::GetLog() << "Compiling shader...\n";
 
 	shader = glCreateShader(type);
 	glShaderSource(shader, 1, src, nullptr);
@@ -23,6 +23,7 @@ GLuint _CreateShader(std::string source, GLenum type)
 	if (!compileStatus)
 	{
 		glGetShaderInfoLog(shader, 256, &infoLogLength, infoLog);
+		fa::Util::GetLog() << "Source:\n" << source << "\n";
 		fa::Util::GetLog() << "InfoLog:\n" << infoLog << "\n";
 		return 0;
 	}
@@ -65,6 +66,34 @@ GLuint fa::Util::CreateProgram(std::string vertexSource, std::string fragmentSou
 
 	glFastFail(glLinkProgram(program));
 	
+	GLint linkStatus;
+	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+	NotZeroFail(linkStatus == GL_FALSE);
+
+	glFastFail(glValidateProgram(program));
+
+	return program;
+}
+
+GLuint fa::Util::CreateProgram(std::string vertexSource, std::string geometrySource, std::string fragmentSource)
+{
+	GLuint program = glCreateProgram();
+
+	GLuint vertexShader = _CreateShader(vertexSource, GL_VERTEX_SHADER);
+	GLuint geometryShader = _CreateShader(geometrySource, GL_GEOMETRY_SHADER);
+	GLuint fragmentShader = _CreateShader(fragmentSource, GL_FRAGMENT_SHADER);
+
+	ZeroFail(vertexShader);
+	ZeroFail(geometryShader);
+	ZeroFail(fragmentShader);
+	
+
+	glFastFail(glAttachShader(program, vertexShader));
+	glFastFail(glAttachShader(program, geometryShader));
+	glFastFail(glAttachShader(program, fragmentShader));
+
+	glFastFail(glLinkProgram(program));
+
 	GLint linkStatus;
 	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 	NotZeroFail(linkStatus == GL_FALSE);

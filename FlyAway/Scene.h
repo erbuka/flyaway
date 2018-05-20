@@ -20,7 +20,7 @@ namespace fa
 
 		void Update(float elapsedTime);
 		void Render(GLuint program);
-
+		void RenderWater(GLuint program);
 	private:
 
 		static constexpr float MaxCameraSpeed = 50.0f;
@@ -28,7 +28,8 @@ namespace fa
 		std::shared_ptr<Biome> RandomBiome();
 
 		BoundingBox3f GetNextChunkBounds();
-
+		
+		void UpdateMatrices();
 		void UpdateBiome(float elapsedTime);
 		void UpdateWorld(float elapsedTime);
 

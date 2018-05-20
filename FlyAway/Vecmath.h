@@ -330,6 +330,9 @@ namespace fa {
 		Vector3<T> Position;
 		Vector3<T> Normal;
 		Vector3<T> DiffuseColor;
+		Vector3<T> Extra0;
+		Vector3<T> Extra1;
+		unsigned char Padding[4];
 	};
 
 
