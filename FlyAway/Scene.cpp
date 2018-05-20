@@ -99,7 +99,6 @@ void fa::Scene::InitializeWorld()
 void fa::Scene::StartWorldGeneratorThread()
 {
 	auto wgf = [this]() {
-		std::cout << "World generator started" << std::endl;
 		while (1)
 		{
 			m_WorldGeneratorMutex.lock();
