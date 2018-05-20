@@ -30,7 +30,6 @@ namespace fa
 		BoundingBox3f GetNextChunkBounds();
 		
 		void UpdateMatrices();
-		void UpdateBiome(float elapsedTime);
 		void UpdateWorld(float elapsedTime);
 
 		std::vector<Terrain*> m_Terrain;

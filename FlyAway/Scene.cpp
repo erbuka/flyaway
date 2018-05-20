@@ -197,11 +197,6 @@ fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 	return m_CurrentWorldChunk;
 }
 
-void fa::Scene::UpdateBiome(float elapsedTime)
-{
-
-}
-
 void fa::Scene::UpdateWorld(float elapsedTime)
 {
 	// Remove OOB Terrain
