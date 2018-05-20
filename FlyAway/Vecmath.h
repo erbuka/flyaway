@@ -7,15 +7,7 @@
 
 namespace fa {
 
-	template<typename T>
-	union Vector4
-	{
-		T Components[4];
-		struct { T X, Y, Z, W; };
-		struct { T R, G, B, A; };
-		Vector4() : X(0), Y(0), Z(0), W(0) {}
-		Vector4(T x, T y , T z, T w) : X(x), Y(y), Z(z), W(w) {}
-	};
+
 
 	template<typename T>
 	union Vector3
@@ -81,7 +73,7 @@ namespace fa {
 		}
 
 	};
-	
+
 	template<typename T>
 	std::ostream& operator<<(std::ostream& os, const Vector3<T>& v)
 	{
@@ -142,6 +134,16 @@ namespace fa {
 			lhs.X * rhs.Y - lhs.Y * rhs.X
 		};
 	}
+
+	template<typename T>
+	union Vector4
+	{
+		T Components[4];
+		struct { T X, Y, Z, W; };
+		struct { T R, G, B, A; };
+		Vector4() : X(0), Y(0), Z(0), W(0) {}
+		Vector4(T x, T y, T z, T w) : X(x), Y(y), Z(z), W(w) {}
+	};
 
 	template<typename T>
 	union Vector2
@@ -302,6 +304,20 @@ namespace fa {
 			}
 		}
 		
+		return result;
+	}
+
+	template<typename T>
+	Vector4<T> operator*(const Matrix4<T>& m, const Vector4<T>& v)
+	{
+		Vector4<T> result;
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				result.Components[i] += m.Components[i * 4 + j] * v.Components[j];
+			}
+		}
 		return result;
 	}
 

@@ -248,6 +248,8 @@ void fa::Engine::Render()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		Vector4f lightDirection = m_Scene->GetModelViewMatrix() * Vector4f(light.Direction.X, light.Direction.Y, light.Direction.Z, 0.0);
+
 
 		// Albedo
 		glActiveTexture(GL_TEXTURE0);
@@ -272,7 +274,7 @@ void fa::Engine::Render()
 		glUniform1i(glGetUniformLocation(program, "in_Edge"), 2);
 		glUniform1i(glGetUniformLocation(program, "in_Depth"), 3);
 		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
-		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
+		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&lightDirection);
 
 		glFastFail(glBindVertexArray(m_ScreenQuad.VAO));
 		glFastFail(glDrawArrays(GL_TRIANGLES, 0, 6));

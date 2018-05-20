@@ -23,6 +23,9 @@ namespace fa
 		void Update(float elapsedTime);
 		void Render(GLuint program);
 		void RenderWater(GLuint program);
+
+		Matrix4f GetModelViewMatrix();
+
 	private:
 
 		static constexpr float MaxCameraSpeed = 50.0f;

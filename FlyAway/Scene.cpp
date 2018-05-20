@@ -187,6 +187,11 @@ void fa::Scene::RenderWater(GLuint program)
 	}
 }
 
+fa::Matrix4f fa::Scene::GetModelViewMatrix()
+{
+	return m_ModelView.Current();
+}
+
 
 std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 {
