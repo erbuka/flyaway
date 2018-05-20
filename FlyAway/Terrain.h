@@ -63,7 +63,8 @@ namespace fa
 		void SetAdjacenty(EAdjacency adjacency, int index, const Vertexf& vertex);
 		Vertexf& GetAdjacency(EAdjacency adjacency, int index);
 
-		void Generate();
+		void GenerateWater();
+		void GenerateVertexArrays();
 
 		GLuint GetTerrainVAO() const;
 		std::shared_ptr<Water> GetWater() const;
@@ -78,9 +79,11 @@ namespace fa
 
 		BoundingBox3f& GetBounds();
 
+		void ComputeNormals();
+
+
 	private:
 
-		void ComputeNormals();
 
 
 		int m_VerticesCount, m_VerticesX, m_VerticesZ;

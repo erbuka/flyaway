@@ -19,23 +19,20 @@ fa::Scene::Scene(Engine * engine, int width, int chunkDepth, float tileSize, flo
 	m_SightRange(sightRange)
 {
 	m_WorldChunks = std::ceil(sightRange / (m_TileSize * m_ChunkDepth));
-	m_BiomeInterpolator = new BiomeInterpolator();
+	m_BiomeInterpolator = std::shared_ptr<BiomeInterpolator>(new BiomeInterpolator());
 
 	m_CurrentWorldChunk = {
 		Vector3f(-m_Width / 2 * m_TileSize, 0, -m_ChunkDepth * m_TileSize),
 		Vector3f(m_Width / 2 * m_TileSize, 0, 0)
 	};
 
+	InitializeWorld();
+	StartWorldGeneratorThread();
 }
 
 fa::Scene::~Scene()
 {
-	for (auto terrain : m_Terrain)
-	{
-		delete terrain;
-	}
 
-	delete m_BiomeInterpolator;
 }
 
 void fa::Scene::Update(float elapsedTime)
@@ -80,6 +77,42 @@ void fa::Scene::Update(float elapsedTime)
 
 	UpdateMatrices();
 
+}
+
+void fa::Scene::InitializeWorld()
+{
+	// GenerateTerrain new biomes
+	while (m_BiomeInterpolator->GetTransitionsCount() < 5)
+	{
+		m_BiomeInterpolator->PushTransition(RandomBiome(), Random::NextValue(-200, -400), Random::NextValue(-500, -1000));
+	}
+
+	// GenerateTerrain new world chunks
+	while (m_Terrain.size() < m_WorldChunks)
+	{
+		auto terrain = GenerateNextWorldChunk();
+		terrain->GenerateVertexArrays();
+		m_Terrain.push_back(terrain);
+	}
+}
+
+void fa::Scene::StartWorldGeneratorThread()
+{
+	auto wgf = [this]() {
+		std::cout << "World generator started" << std::endl;
+		while (1)
+		{
+			m_WorldGeneratorMutex.lock();
+			if (m_NewTerrain == nullptr)
+			{
+				m_NewTerrain = GenerateNextWorldChunk();
+			}
+			m_WorldGeneratorMutex.unlock();
+			std::this_thread::yield();
+		}
+	};
+
+	m_WorldGenerator = std::thread(wgf);
 }
 
 void fa::Scene::UpdateMatrices()
@@ -171,30 +204,21 @@ std::shared_ptr<fa::Biome> fa::Scene::RandomBiome()
 
 fa::BoundingBox3f fa::Scene::GetNextChunkBounds()
 {
-	/*
-	static bool firstCall = true;
-	static BoundingBox3f current;
 
-	if (firstCall)
-	{
-		current = { 
-			Vector3f(-m_Width / 2 * m_TileSize, 0, -m_ChunkDepth * m_TileSize),
-			Vector3f(m_Width / 2 * m_TileSize, 0, 0) 
-		};
-		firstCall = false;
-	}
-	else
-	{
-		current.Min = current.Min + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
-		current.Max = current.Max + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
-	}
-	*/
 
 	m_CurrentWorldChunk.Min = m_CurrentWorldChunk.Min + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
 	m_CurrentWorldChunk.Max = m_CurrentWorldChunk.Max + Vector3f(0, 0, -m_ChunkDepth * m_TileSize);
 
 
 	return m_CurrentWorldChunk;
+}
+
+std::shared_ptr<fa::Terrain> fa::Scene::GenerateNextWorldChunk()
+{
+	BoundingBox3f bounds = GetNextChunkBounds();
+	std::shared_ptr<Terrain> terrain(new Terrain(m_Width, m_ChunkDepth, bounds));
+	m_BiomeInterpolator->GenerateTerrain(terrain.get());
+	return terrain;
 }
 
 void fa::Scene::UpdateWorld(float elapsedTime)
@@ -205,7 +229,6 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 
 		if ((*terrain)->GetBounds().Min.Z > m_CameraPosition.Z)
 		{
-			delete (*terrain);
 			terrain = m_Terrain.erase(terrain);
 		}
 		else
@@ -213,9 +236,6 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 			++terrain;
 		}
 	}
-
-	// Remove OOB Objects
-
 
 
 	// GenerateTerrain new Biomes (TEMP)
@@ -225,16 +245,14 @@ void fa::Scene::UpdateWorld(float elapsedTime)
 	}
 
 	// GenerateTerrain new world chunks
-	while (m_Terrain.size() < m_WorldChunks)
+
+	m_WorldGeneratorMutex.lock();
+	if (m_NewTerrain != nullptr && m_Terrain.size() < m_WorldChunks)
 	{
-
-		BoundingBox3f bounds = GetNextChunkBounds();
-		Terrain * terrain = new Terrain(m_Width, m_ChunkDepth, bounds);
-
-		m_BiomeInterpolator->GenerateTerrain(terrain);
-
-		m_Terrain.push_back(terrain);
+		m_NewTerrain->GenerateVertexArrays();
+		m_Terrain.push_back(std::move(m_NewTerrain));
 	}
+	m_WorldGeneratorMutex.unlock();
 
 	m_BiomeInterpolator->Cleanup(m_CurrentWorldChunk.Min.Z);
 

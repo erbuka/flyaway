@@ -2,6 +2,8 @@
 
 #include "MatrixStack.h"
 #include <vector>
+#include <mutex>
+#include <thread>
 
 namespace fa 
 {
@@ -28,19 +30,26 @@ namespace fa
 		std::shared_ptr<Biome> RandomBiome();
 
 		BoundingBox3f GetNextChunkBounds();
+		std::shared_ptr<Terrain> GenerateNextWorldChunk();
 		
+		void InitializeWorld();
+		void StartWorldGeneratorThread();
 		void UpdateMatrices();
 		void UpdateWorld(float elapsedTime);
 
-		std::vector<Terrain*> m_Terrain;
+		std::vector<std::shared_ptr<Terrain>> m_Terrain;
+		std::shared_ptr<Terrain> m_NewTerrain;
 
 		MatrixStack4f m_Projection, m_ModelView;
 		int m_Width, m_ChunkDepth, m_WorldChunks;
 		float m_TileSize, m_SightRange;
 		Engine * m_Engine;
 		Vector3f m_CameraPosition, m_CameraVelocity;
-		BiomeInterpolator * m_BiomeInterpolator;
+		std::shared_ptr<BiomeInterpolator> m_BiomeInterpolator;
 		BoundingBox3f m_CurrentWorldChunk;
+
+		std::thread m_WorldGenerator;
+		std::mutex m_WorldGeneratorMutex;
 
 	};
 }

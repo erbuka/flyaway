@@ -27,6 +27,31 @@ fa::Water::~Water()
 	glDeleteVertexArrays(1, &m_Vao);
 }
 
+void fa::Water::GenerateVertexArrays()
+{
+	/* Generate buffers */
+
+	glGenVertexArrays(1, &m_Vao);
+	glBindVertexArray(m_Vao);
+
+	glGenBuffers(1, &m_Vb);
+	glBindBuffer(GL_ARRAY_BUFFER, m_Vb);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertexf) * m_Vertices.size(), (void*)m_Vertices.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertexf), (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertexf), (void*)12);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(Vertexf), (void*)24);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertexf), (void*)36);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
+	glBindVertexArray(0);
+}
+
 void fa::Water::Generate(const Terrain& terrain)
 {
 
@@ -78,27 +103,7 @@ void fa::Water::Generate(const Terrain& terrain)
 	/* Set the height of the generate triangles to 0 (Water is at 0 Y by convention) */
 	std::for_each(m_Vertices.begin(), m_Vertices.end(), [](Vertexf& v) { v.Position.Y = 0; });
 	
-	/* Generate buffers */
-	
-	glGenVertexArrays(1, &m_Vao);
-	glBindVertexArray(m_Vao);
 
-	glGenBuffers(1, &m_Vb);
-	glBindBuffer(GL_ARRAY_BUFFER, m_Vb);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertexf) * m_Vertices.size(), (void*)m_Vertices.data(), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertexf), (void*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertexf), (void*)12);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(Vertexf), (void*)24);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertexf), (void*)36);
-	
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glEnableVertexAttribArray(3);
-
-	glBindVertexArray(0);
 
 }
 

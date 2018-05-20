@@ -121,10 +121,15 @@ fa::Vertexf & fa::Terrain::GetAdjacency(EAdjacency adjacency, int index)
 	return m_Adjacency[adjacency][index];
 }
 
-void fa::Terrain::Generate()
+void fa::Terrain::GenerateWater()
 {
-	/* Compute terrain normals */
-	ComputeNormals();
+	/* Generate Water VAO */
+	m_Water = std::shared_ptr<Water>(new Water());
+	m_Water->Generate(*this);
+}
+
+void fa::Terrain::GenerateVertexArrays()
+{
 
 	/* Generate terrain VAO */
 	glGenVertexArrays(1, &m_VAO);
@@ -147,9 +152,8 @@ void fa::Terrain::Generate()
 
 	glBindVertexArray(0);
 
-	/* Generate Water VAO */
-	m_Water = std::shared_ptr<Water>(new Water());
-	m_Water->Generate(*this);
+	/* Generate water VAOs*/
+	m_Water->GenerateVertexArrays();
 }
 
 void fa::Terrain::ComputeNormals()

@@ -36,7 +36,7 @@ fa::Engine * fa::Engine::GetInstance()
 
 fa::Engine::~Engine()
 {
-	Dispose();
+
 }
 
 void fa::Engine::Start()
@@ -45,6 +45,9 @@ void fa::Engine::Start()
 	auto prevTime = std::chrono::high_resolution_clock::now();
 
 	Init();
+
+	int fpsCounter = 0;
+	float fpsTimer = 0;
 	
 	while (!glfwWindowShouldClose(m_Window))
 	{
@@ -52,9 +55,17 @@ void fa::Engine::Start()
 		std::chrono::duration<float> deltaTime = currTime - prevTime;
 		prevTime = currTime;
 
-		sprintf_s(title, "FPS: %d", (int)(1 / deltaTime.count()));
+		fpsCounter++;
+		fpsTimer += deltaTime.count();
 
-		glfwSetWindowTitle(m_Window, title);
+		if (fpsTimer >= 1.0f)
+		{
+			sprintf_s(title, "FPS: %d", fpsCounter);
+			glfwSetWindowTitle(m_Window, title);
+			fpsCounter = 0;
+			fpsTimer = 0;
+		}
+
 
 		Update(deltaTime.count());
 		Render();
@@ -64,6 +75,8 @@ void fa::Engine::Start()
 		glfwPollEvents();
 
 	}
+
+	Dispose();
 }
 
 int fa::Engine::GetWindowWidth() const

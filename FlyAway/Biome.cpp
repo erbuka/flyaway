@@ -37,9 +37,10 @@ void fa::Biome::GenerateTerrain(Terrain * terrain)
 	}
 
 	// Generate Normals
+	terrain->ComputeNormals();
 	
-
-	terrain->Generate();
+	// Generate Water
+	terrain->GenerateWater();
 
 	auto& sceneObjGrid = terrain->GetSceneObjects();
 

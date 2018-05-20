@@ -14,6 +14,7 @@ namespace fa
 		Water();
 		~Water();
 
+		void GenerateVertexArrays();
 		void Generate(const Terrain& terrain);
 		int GetVerticesCount() const;
 		GLuint GetVAO() const;
