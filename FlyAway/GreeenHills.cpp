@@ -18,11 +18,11 @@ namespace _GreenHills
 
 fa::GreenHills::GreenHills()
 {
-	m_TerrainHeight = std::unique_ptr<Perlin>(new Perlin(300));
-	m_TerrainHeight->SetPersistance(0.4f);
+	m_TerrainHeight = std::unique_ptr<Perlin>(new Perlin(1024.0f));
+	m_TerrainHeight->SetPersistance(0.6f);
 
-	m_ForestPerlin = std::unique_ptr<Perlin>(new Perlin(128));
-	m_ForestPerlin->SetPersistance(0.6f);
+	m_ForestPerlin = std::unique_ptr<Perlin>(new Perlin(1024.0f));
+	m_ForestPerlin->SetPersistance(0.9f);
 	
 	std::shared_ptr<ModelRandomGenerator> tree(new ModelRandomGenerator{
 		Engine::GetInstance()->GetModel(Models::Cypress0DarkGreen),

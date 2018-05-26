@@ -32,7 +32,8 @@ fa::Scene::Scene(Engine * engine, int width, int chunkDepth, float tileSize, flo
 
 fa::Scene::~Scene()
 {
-
+	m_WorldGenerationRunning = false;
+	m_WorldGenerator.join();
 }
 
 void fa::Scene::Update(float elapsedTime)
@@ -98,8 +99,10 @@ void fa::Scene::InitializeWorld()
 
 void fa::Scene::StartWorldGeneratorThread()
 {
+	m_WorldGenerationRunning = true;
+
 	auto wgf = [this]() {
-		while (1)
+		while (m_WorldGenerationRunning)
 		{
 			m_WorldGeneratorMutex.lock();
 			if (m_NewTerrain == nullptr)

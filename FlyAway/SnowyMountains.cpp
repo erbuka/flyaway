@@ -15,10 +15,10 @@ namespace _SnowyMountains
 
 fa::SnowyMountains::SnowyMountains()
 {
-	m_Height = std::unique_ptr<Perlin>(new Perlin(256.0f));
+	m_Height = std::unique_ptr<Perlin>(new Perlin(1024.0f));
 	m_Snow = std::unique_ptr<Perlin>(new Perlin(256.0f));
 
-	m_Height->SetPersistance(0.5f);
+	m_Height->SetPersistance(0.75f);
 	m_Snow->SetPersistance(0.9f);
 
 	std::shared_ptr<ModelRandomGenerator> item(new ModelRandomGenerator{

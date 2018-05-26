@@ -53,6 +53,7 @@ namespace fa
 
 		std::thread m_WorldGenerator;
 		std::mutex m_WorldGeneratorMutex;
+		bool m_WorldGenerationRunning;
 
 	};
 }
