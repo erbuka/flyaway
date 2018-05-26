@@ -8,6 +8,7 @@ namespace fa
 	{
 	public:
 		Noise(float domainSize) : m_DomainSize(domainSize) {}
+		virtual ~Noise() {}
 		float GetDomainSize() { return m_DomainSize; }
 		float Sample(const Vector3f& point);
 		float Sample(const Vector2f& point);

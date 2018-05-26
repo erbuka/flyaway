@@ -17,6 +17,7 @@ namespace fa
 	class Biome
 	{
 	public:
+		virtual ~Biome() {}
 		virtual void GenerateTerrain(Terrain * terrain);
 		virtual SceneObject* GenerateSceneObject(Terrain * terrain, BoundingBox3f bounds);
 		virtual BiomeTerrainDescriptor DescribeTerrainAt(const Vector3f& position);
