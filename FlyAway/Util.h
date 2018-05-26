@@ -6,6 +6,7 @@
 #include <array>
 #include <map>
 #include <memory>
+#include <random>
 #include "GL/glew.h"
 
 #define glFastFail(f) { f; Util::NotZeroFail(glGetError()); }
@@ -99,28 +100,41 @@ namespace fa
 	class Random
 	{
 	public:
+		
+		void Initialize()
+		{
+
+		}
+
 		template<typename T>
 		static T& Next(std::vector<T>& v)
 		{
-			return v[rand() % v.size()];
+			return v[(int)(v.size() * Rand())];
 		}
 
 		template<typename T>
-		static T NextValue()
+		static inline T NextValue()
 		{
-			return (T)((double)rand() / RAND_MAX);
+			return (T)(Rand());
 		}
 
 		template<typename T>
-		static T NextValue(T min, T max)
+		static inline T NextValue(T min, T max)
 		{
 			return (T)(min + NextValue<double>() * (max - min));
 		}
 
 		template<typename T>
-		static T NextFit(T itemLength, T min, T max)
+		static inline T NextFit(T itemLength, T min, T max)
 		{
 			return NextValue<T>(min, max - itemLength);
+		}
+	private:
+		static inline double Rand()
+		{
+			static std::default_random_engine engine;
+			static std::uniform_real_distribution<double> distribution;
+			return distribution(engine);
 		}
 	};
 
