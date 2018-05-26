@@ -68,9 +68,16 @@ GLuint fa::Util::CreateProgram(std::string vertexSource, std::string fragmentSou
 	
 	GLint linkStatus;
 	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-	NotZeroFail(linkStatus == GL_FALSE);
+	if (!linkStatus)
+	{
+		GLchar infoLog[256];
+		GLsizei length;
+		glGetProgramInfoLog(program, 256, &length, infoLog);
+		fa::Util::GetLog() << "InfoLog:\n" << infoLog << "\n";
+		Util::ZeroFail(0);
+	}
 
-	glFastFail(glValidateProgram(program));
+	glValidateProgram(program);
 
 	return program;
 }
@@ -98,7 +105,7 @@ GLuint fa::Util::CreateProgram(std::string vertexSource, std::string geometrySou
 	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 	NotZeroFail(linkStatus == GL_FALSE);
 
-	glFastFail(glValidateProgram(program));
+	glValidateProgram(program);
 
 	return program;
 }

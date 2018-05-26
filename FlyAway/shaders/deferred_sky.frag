@@ -1,6 +1,5 @@
 #version 330
 
-uniform vec3 in_LightDirection;
 uniform vec3 in_ViewDirection;
 uniform vec3 in_TopColor;
 uniform vec3 in_HorizonColor;
@@ -23,8 +22,6 @@ void main()
 	vec3 rotRay = matRot * ray;
 	
 	float colorFactor = (dot(rotRay, vec3(0.0, 1.0, 0.0)) + 1.0) / 2.0;
-	float lightFactor = pow(max(0.0, dot(rotRay, transpose(matRot) * in_LightDirection)), 64.0);
 
-	gl_FragData[0] = vec4(mix(in_HorizonColor, in_TopColor, colorFactor), 1.0) + lightFactor * vec4(1.0, 1.0, 1.0, 1.0);
-	gl_FragData[1] = vec4((normalize(in_LightDirection) + 1.0) / 2.0, 0.0);
+	gl_FragData[0] = vec4(mix(in_HorizonColor, in_TopColor, colorFactor), 1.0);
 }

@@ -30,8 +30,5 @@ namespace fa
 		Vector3f m_TopColor, m_HorizonColor;
 		float m_Time, m_DayDuration;
 		Light m_Light;
-
-
-
 	};
 }

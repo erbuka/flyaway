@@ -10,7 +10,7 @@ layout(location = 2) in vec3 in_Color;
 smooth out vec3 fs_Color;
 smooth out vec3 fs_Normal;
 smooth out vec3 fs_Position;
-\
+
 void main()
 {
 	vec4 position = in_ModelViewMatrix * vec4(in_Position, 1.0);

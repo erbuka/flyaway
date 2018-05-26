@@ -2,9 +2,9 @@
 
 uniform float in_SightRange;
 
-in vec3 fs_Color;
-in vec3 fs_Normal;
-in vec3 fs_Position;
+smooth in vec3 fs_Color;
+smooth in vec3 fs_Normal;
+smooth in vec3 fs_Position;
 
 void main()
 {

@@ -224,9 +224,6 @@ void fa::Engine::Render()
 
 		glFastFail(glUseProgram(program));
 
-
-		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
-		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&light.Direction);
 		glUniform3fv(glGetUniformLocation(program, "in_ViewDirection"), 1, (float*)&viewDir);
 		glUniform3fv(glGetUniformLocation(program, "in_TopColor"), 1, (float*)&topColor);
 		glUniform3fv(glGetUniformLocation(program, "in_HorizonColor"), 1, (float*)&horizonColor);
@@ -248,9 +245,6 @@ void fa::Engine::Render()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Vector4f lightDirection = m_Scene->GetModelViewMatrix() * Vector4f(light.Direction.X, light.Direction.Y, light.Direction.Z, 0.0);
-
-
 		// Albedo
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_DeferredFB->GetColorAttachment(0));
@@ -263,18 +257,12 @@ void fa::Engine::Render()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_EdgeFB->GetColorAttachment(0));
 
-		// Depth
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, m_DeferredFB->GetDepthAttachment());
-
 		glFastFail(glUseProgram(program));
 
 		glUniform1i(glGetUniformLocation(program, "in_Albedo"), 0);
 		glUniform1i(glGetUniformLocation(program, "in_Normal"), 1);
 		glUniform1i(glGetUniformLocation(program, "in_Edge"), 2);
-		glUniform1i(glGetUniformLocation(program, "in_Depth"), 3);
 		glUniform3fv(glGetUniformLocation(program, "in_LightColor"), 1, (float*)&light.Color);
-		glUniform3fv(glGetUniformLocation(program, "in_LightDirection"), 1, (float*)&lightDirection);
 
 		glFastFail(glBindVertexArray(m_ScreenQuad.VAO));
 		glFastFail(glDrawArrays(GL_TRIANGLES, 0, 6));
