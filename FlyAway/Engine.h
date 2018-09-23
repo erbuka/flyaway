@@ -96,7 +96,7 @@ namespace fa
 		void LoadShader(std::string key, std::string vsFile, std::string fsFile);
 		void LoadShader(std::string key, std::string vsFile, std::string gsFile, std::string fsFile);
 
-		Scene * m_Scene;
+		std::unique_ptr<Scene> m_Scene;
 		std::map<std::string, GLuint> m_Programs;
 		std::map<std::string, WavefrontModel*> m_Models;
 		GLFWwindow * m_Window;

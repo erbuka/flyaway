@@ -115,7 +115,7 @@ void fa::Engine::Init()
 	CreateQuadVAO();
 
 	// Initialize Scene
-	m_Scene = new Scene(this, SightRange * 2, 6.0f, 1.0f, SightRange);
+	m_Scene = std::unique_ptr<Scene>(new Scene(this, SightRange * 2, 6.0f, 1.0f, SightRange));
 
 	// Initialize sky
 	m_Sky = std::unique_ptr<Sky>(new Sky(240.0f));
@@ -383,7 +383,6 @@ void fa::Engine::LoadModels()
 
 void fa::Engine::Dispose()
 {
-	delete m_Scene;
 	for (auto program : m_Programs)
 	{
 		glDeleteProgram(program.second);
