@@ -10,7 +10,7 @@ namespace fa
 	class MatrixStack4
 	{
 	public:
-		MatrixStack4()
+		MatrixStack4() : m_CurrentPosition(0)
 		{
 
 		}
