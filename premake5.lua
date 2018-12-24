@@ -1,7 +1,10 @@
 workspace "FlyAway"
     configurations { "Debug", "Release" }
     architecture "x86_64"
-    system "Windows"
+    system "windows"
+
+    filter "system:windows"
+        systemversion "latest"    
 
 project "FlyAway"
     kind "ConsoleApp"
