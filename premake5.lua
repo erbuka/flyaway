@@ -12,6 +12,7 @@ project "FlyAway"
     location "FlyAway"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-int/%{cfg.buildcfg}/%{prj.name}"
+    debugdir "bin/%{cfg.buildcfg}/%{prj.name}"
 
     includedirs { "vendor/glew/include", "vendor/glfw/include" }
     libdirs { "vendor/glew/lib", "vendor/glfw/lib" }
@@ -22,6 +23,11 @@ project "FlyAway"
 
     files { "%{prj.name}/**.h", "%{prj.name}/**.cpp" }
 
+    postbuildcommands {
+        "{COPY} shaders/ ../bin/%{cfg.buildcfg}/%{prj.name}/shaders",
+        "{COPY} models/ ../bin/%{cfg.buildcfg}/%{prj.name}/models" 
+    }        
+
     filter "configurations:Debug"
         defines "DEBUG"
         symbols "On"
@@ -30,7 +36,3 @@ project "FlyAway"
         defines "NDEBUG"
         optimize "On"
         symbols "Off"
-        postbuildcommands {
-            "{COPY} shaders/ ../bin/%{cfg.buildcfg}/%{prj.name}/shaders",
-            "{COPY} models/ ../bin/%{cfg.buildcfg}/%{prj.name}/models", 
-        }    

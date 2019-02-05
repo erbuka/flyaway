@@ -69,6 +69,10 @@
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\vendor\glew\lib;..\vendor\glfw\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST shaders\ (xcopy /Q /E /Y /I shaders ..\bin\Debug\$(ProjectName)\shaders &gt; nul) ELSE (xcopy /Q /Y /I shaders ..\bin\Debug\$(ProjectName)\shaders &gt; nul)
+IF EXIST models\ (xcopy /Q /E /Y /I models ..\bin\Debug\$(ProjectName)\models &gt; nul) ELSE (xcopy /Q /Y /I models ..\bin\Debug\$(ProjectName)\models &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

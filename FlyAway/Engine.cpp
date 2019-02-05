@@ -21,7 +21,7 @@ fa::Engine * fa::Engine::GetInstance()
 	{
 		GLFWwindow * window;
 		fa::Util::ZeroFail(glfwInit());
-		fa::Util::ZeroFail(window = glfwCreateWindow(fa::CWidth, fa::CHeight, "Test", nullptr, nullptr));
+		fa::Util::ZeroFail(window = glfwCreateWindow(fa::CWidth, fa::CHeight, "Flyaway", nullptr, nullptr));
 		glfwMakeContextCurrent(window);
 		fa::Util::NotZeroFail(glewInit());
 		
@@ -60,7 +60,7 @@ void fa::Engine::Start()
 
 		if (fpsTimer >= 1.0f)
 		{
-			sprintf_s(title, "FPS: %d", fpsCounter);
+			sprintf_s(title, "Flyaway (FPS: %d)", fpsCounter);
 			glfwSetWindowTitle(m_Window, title);
 			fpsCounter = 0;
 			fpsTimer = 0;
