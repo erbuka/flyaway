@@ -3,11 +3,6 @@
 The goal of this project was to develop a framework to generate an infinite world with different biomes and whout visible pattern repetition.
 
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway1.jpg)
-![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway2.jpg)
-![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway3.jpg)
-![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway4.jpg)
-![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway5.jpg)
-![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway6.jpg)
 
 ## Building
 
