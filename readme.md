@@ -22,7 +22,7 @@ The __BiomeInterpolator__ class extends Biome, and basically implements a smooth
 
 Each particual biome extends the __Biome__ base class, therefore is rather easy to add new biomes to the world. Of course this also involves tweaking a few numbers (like the perlin noise parameters, the colors, etc) to make it look nice, but all the transitions are handled gracefully by the __BiomeInterpolator__ class.
 
-Each biome can have objects (like trees, rocks, water). The space is subdivided into uniform grid, and in each cell can have an object in it. The placement inside the randomized but kept whitin the bounds of the cell, so that objects do not overlap, but also the viewer can't notice the grid division. The object to place is selected by a probability tree where each node branches based on a random value. These values are injected for each cell, and they're calculated with different noise functions.
+Each biome can have objects (like trees, rocks, water). The space is subdivided into a uniform grid, and in each cell can have an object in it. The placement inside the randomized but kept whitin the bounds of the cell, so that objects do not overlap, but also the viewer can't notice the grid division. The object to place is selected by a probability tree where each node branches based on a random value. These values are injected for each cell, and they're calculated with different noise functions.
 
 I also implemented a simple day/night cycle with dawn and sunset. Nothing too special here, the sky and the light changes over time.
 
