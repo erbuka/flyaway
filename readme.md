@@ -1,6 +1,6 @@
 # Flyaway
 
-The goal of this project was to develop a framework to generate an infinite world with different biomes and whout visible pattern repetition.
+The goal of this project was to develop a framework to generate an infinite world with different biomes and without visible pattern repetition.
 
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway1.jpg)
 
