@@ -1,8 +1,6 @@
 # Flyaway
 
-This project doesn't really have a purpose, I was studying some techniques for procedural generation.
-
-The goal was to develop a framework to generate an infinite world with different biomes and without visible pattern repetition. The terrain generation is mostly made with perlin noise, each time with different seeds, and different properities depending on the biome.
+The goal of this project was to develop a framework to generate an infinite world with different biomes and whout visible pattern repetition.
 
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway1.jpg)
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway2.jpg)
@@ -13,7 +11,6 @@ The goal was to develop a framework to generate an infinite world with different
 ## Building
 
 This project uses [Premake](https://premake.github.io/) to build project files. As for now, I have only compiled it under windows, but there shouldn't be any problems compiling for other platforms like Linux or MacOS.
-
 
 ## Implementation
 
