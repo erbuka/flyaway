@@ -7,6 +7,7 @@ The goal of this project was to develop a framework to generate an infinite worl
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway3.jpg)
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway4.jpg)
 ![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway5.jpg)
+![Screenshot](https://github.com/erbuka/flyaway/blob/master/screenshots/flyaway6.jpg)
 
 ## Building
 
