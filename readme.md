@@ -19,6 +19,6 @@ Each biome can have objects (like trees, rocks, water). The space is subdivided 
 
 I also implemented a simple day/night cycle with dawn and sunset. Nothing too special here, the sky and the light changes over time.
 
-I wasn't sure about the graphics style to use. I wanted to make a PBR scene with realitisc objects, but also I wanted to make the 3d models myself. So in the end, I developed my own cell shading, and since the models would be low poly, I was able to do it myself.
+I wasn't sure about the graphics style to use. I wanted to make a PBR scene with realitisc objects, but also I wanted to make the 3d models myself. So in the end, I developed my own cell shading, and since the models would be low poly, I was able to do them myself.
 
 
