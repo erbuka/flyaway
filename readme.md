@@ -6,7 +6,7 @@ The goal of this project was to develop a framework to generate an infinite worl
 
 ## Building
 
-This project uses [Premake](https://premake.github.io/) to build project files. As for now, I have only compiled it under windows, but there shouldn't be any problems compiling for other platforms like Linux or MacOS.
+This project uses [Premake](https://premake.github.io/) to build project files.
 
 ## Implementation
 
