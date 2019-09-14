@@ -58,7 +58,7 @@ namespace fa
 		int GetVerticesZ() const;
 
 		int GetVerticesCount() const;
-		int GetIndicescount() const;
+		int GetIndicesCount() const;
 
 		void SetAdjacenty(EAdjacency adjacency, int index, const Vertexf& vertex);
 		Vertexf& GetAdjacency(EAdjacency adjacency, int index);

@@ -143,7 +143,7 @@ void fa::Scene::Render(GLuint program)
 		glUniformMatrix4fv(mvLoc, 1, GL_TRUE, m_ModelView.Current().Ptr());
 
 		glBindVertexArray(terrain->GetTerrainVAO());
-		glDrawElements(GL_TRIANGLES, terrain->GetIndicescount(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, terrain->GetIndicesCount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		auto& sceneObjGrid = terrain->GetSceneObjects();

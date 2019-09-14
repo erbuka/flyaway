@@ -106,7 +106,7 @@ int fa::Terrain::GetVerticesCount() const
 	return m_VerticesCount;
 }
 
-int fa::Terrain::GetIndicescount() const
+int fa::Terrain::GetIndicesCount() const
 {
 	return m_Indices.size();
 }

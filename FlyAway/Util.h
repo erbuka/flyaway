@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <random>
+#include <chrono>
 #include "GL/glew.h"
 
 #define glFastFail(f) { f; Util::NotZeroFail(glGetError()); }
@@ -132,7 +133,7 @@ namespace fa
 	private:
 		static inline double Rand()
 		{
-			static std::default_random_engine engine;
+			static std::mt19937 engine(std::chrono::system_clock::now().time_since_epoch().count());
 			static std::uniform_real_distribution<double> distribution;
 			return distribution(engine);
 		}
